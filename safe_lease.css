@@ -1,0 +1,84 @@
+.safe-lease-page {
+  background: #f6f8fc;
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.safe-lease-page .page-container {
+  max-width: 850px;
+  margin: 0 auto;
+  background: white;
+  padding: 40px 35px;
+  border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+.safe-lease-page h1 {
+  font-size: 2.3rem;
+  color: #13294b;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.safe-lease-page .page-subtitle {
+  text-align: center;
+  color: #5a6b85;
+  font-size: 1.05rem;
+  margin-bottom: 30px;
+}
+
+.safe-lease-page .protection-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.safe-lease-page .protection-item {
+  background: #f3f7ff;
+  padding: 16px 18px;
+  border-radius: 12px;
+  font-size: 0.98rem;
+  color: #1c3557;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.5;
+  transition: 0.3s ease;
+}
+
+.safe-lease-page .protection-item::before {
+  content: "✔";
+  color: #2f69d9;
+  font-weight: bold;
+}
+
+.safe-lease-page .protection-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.safe-lease-page .back-btn {
+  display: inline-block;
+  margin-top: 30px;
+  text-decoration: none;
+  background: #13294b;
+  color: white;
+  padding: 12px 22px;
+  border-radius: 8px;
+  font-weight: 700;
+  transition: 0.3s ease;
+}
+
+.safe-lease-page .back-btn:hover {
+  background: #0f1f39;
+}
+
+@media (max-width: 700px) {
+  .safe-lease-page .protection-list {
+    grid-template-columns: 1fr;
+  }
+
+  .safe-lease-page .page-container {
+    padding: 30px 20px;
+  }
+}

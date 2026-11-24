@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bayti - Dashboard</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="bayti-navbar">
+        <a href="{{ url_for('home') }}" class="bayti-logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Bayti Logo">
+        </a>
+
+        <div class="bayti-nav-center">
+            <a href="{{ url_for('buy') }}" class="bayti-link">Buy</a>
+            <a href="{{ url_for('rent') }}" class="bayti-link">Rent</a>
+            <a href="{{ url_for('sell') }}" class="bayti-link">Sell</a>
+            <a href="{{ url_for('find_agent') }}" class="bayti-link">Find an Agent</a>
+            <a href="{{ url_for('ai_assistant') }}" class="bayti-link">HomesyAI</a>
+        </div>
+
+        <div class="bayti-nav-right">
+            <a href="{{ url_for('favorites') }}" class="bayti-link nav-icon-link">
+                <i class="fa-solid fa-heart"></i>
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="bayti-link nav-right-link active-no-line">Dashboard</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+    </div>
+
+    <section class="dashboard-hero">
+        <div class="dashboard-overlay"></div>
+        <div class="dashboard-content">
+            <div class="welcome-card">
+                <div class="welcome-top">
+                    <div>
+                        <p class="eyebrow">Your account</p>
+                        <h1>Welcome back, {{ user.full_name }}</h1>
+                        <p class="subtitle">Manage your saved homes, continue browsing listings, and keep track of your Bayti activity.</p>
+                    </div>
+                    <div class="profile-badge">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                </div>
+
+                <div class="dashboard-actions">
+                    <a href="{{ url_for('favorites') }}" class="primary-btn">
+                        <i class="fa-solid fa-heart"></i>
+                        View Favorites
+                    </a>
+
+                    <a href="{{ url_for('buy') }}" class="secondary-btn">
+                        <i class="fa-solid fa-house"></i>
+                        Browse Properties
+                    </a>
+
+                    <a href="{{ url_for('home') }}" class="secondary-btn">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        Go to Homepage
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="dashboard-section">
+        <div class="dashboard-grid">
+            <div class="info-card">
+                <div class="info-icon">
+                    <i class="fa-solid fa-heart-circle-check"></i>
+                </div>
+                <h3>Favorites</h3>
+                <p>Save homes you love and compare them later in one place.</p>
+                <a href="{{ url_for('favorites') }}">Open favorites</a>
+            </div>
+
+            <div class="info-card">
+                <div class="info-icon">
+                    <i class="fa-solid fa-building"></i>
+                </div>
+                <h3>Explore Listings</h3>
+                <p>Search homes across Lebanon with transparent pricing and clean navigation.</p>
+                <a href="{{ url_for('buy') }}">Browse listings</a>
+            </div>
+
+            <div class="info-card">
+                <div class="info-icon">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <h3>Find an Agent</h3>
+                <p>Connect with agents when you need support for buying, renting, or selling.</p>
+                <a href="{{ url_for('find_agent') }}">Find an agent</a>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>

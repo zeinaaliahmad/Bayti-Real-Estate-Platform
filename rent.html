@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bayti - Rent</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/rent.css') }}">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div class="w3-top">
+    <div class="w3-bar bayti-navbar">
+
+      <div class="bayti-logo">
+        <a href="{{ url_for('home') }}" class="navbar-logo-link">
+          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Bayti Logo" class="navbar-logo">
+        </a>
+      </div>
+
+      <div class="bayti-nav-center">
+        <a href="{{ url_for('buy') }}" class="bayti-link">Buy</a>
+        <a href="{{ url_for('rent') }}" class="bayti-link">Rent</a>
+        <a href="{{ url_for('sell') }}" class="bayti-link">Sell</a>
+        <a href="{{ url_for('find_agent') }}" class="bayti-link">Find an Agent</a>
+        <a href="{{ url_for('ai_assistant') }}" class="bayti-link">HomesyAI</a>
+      </div>
+
+      <div class="bayti-nav-right">
+        <a href="{{ url_for('favorites') }}" class="favorites-link">
+          <i class="fa-solid fa-heart"></i>
+        </a>
+
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('dashboard') }}" class="bayti-login">Dashboard</a>
+          <a href="{{ url_for('logout') }}" class="bayti-signup">Logout</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="bayti-login">Login</a>
+          <a href="{{ url_for('signup') }}" class="bayti-signup">Sign Up</a>
+        {% endif %}
+      </div>
+
+      <a href="javascript:void(0)" class="bayti-menu-btn" onclick="toggleMobileMenu()">
+        <i class="fa-solid fa-bars"></i>
+      </a>
+    </div>
+
+    <div id="mobileMenu" class="w3-bar-block bayti-mobile-menu w3-hide">
+      <a href="{{ url_for('buy') }}" class="w3-bar-item w3-button">Buy</a>
+      <a href="{{ url_for('rent') }}" class="w3-bar-item w3-button">Rent</a>
+      <a href="{{ url_for('sell') }}" class="w3-bar-item w3-button">Sell or Rent my Property</a>
+      <a href="{{ url_for('find_agent') }}" class="w3-bar-item w3-button">Find an Agent</a>
+      <a href="{{ url_for('ai_assistant') }}" class="w3-bar-item w3-button">AI Assistant</a>
+
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard') }}" class="w3-bar-item w3-button bayti-mobile-signin">Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="w3-bar-item w3-button bayti-mobile-signin">Logout</a>
+      {% else %}
+        <a href="{{ url_for('login') }}" class="w3-bar-item w3-button bayti-mobile-signin">Sign In</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Hero + Filters -->
+  <section class="rent-hero">
+    <div class="w3-content">
+      <div class="hero-top-row">
+
+        <div class="hero-text">
+          <h1>Looking for a short-term stay?</h1>
+          <p>
+            From urban apartments to coastal chalets, explore Lebanon's most
+            curated rental collection with AI-powered market insights.
+          </p>
+        </div>
+
+        <div class="filters-container">
+          <form method="GET" action="{{ url_for('rent') }}" class="top-filters-wrap" id="rentFiltersForm">
+            <input type="hidden" name="duration" id="durationInput" value="{{ selected_duration or '' }}">
+
+            <div class="search-input">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input
+                type="text"
+                name="city"
+                value="{{ selected_city or '' }}"
+                placeholder="Search Beirut, Ashrafieh, Mansourieh..."
+                autocomplete="off"
+              >
+            </div>
+
+            <!-- SORT -->
+            <div class="filter-dropdown">
+              <button type="button" class="filter-btn dropdown-toggle" data-target="sortDropdown">
+                Sort By <i class="fa-solid fa-chevron-down"></i>
+              </button>
+
+              <div class="dropdown-panel sort-panel" id="sortDropdown">
+                <div class="dropdown-header">
+                  <span>Sort rentals</span>
+                  <button type="button" class="done-btn" data-close="sortDropdown">Done</button>
+                </div>
+
+                <div class="sort-options">
+                  <label>
+                    <input type="radio" name="sort_by" value="newest" {% if sort_by == 'newest' or not sort_by %}checked{% endif %}>
+                    <span>Newest</span>
+                  </label>
+
+                  <label>
+                    <input type="radio" name="sort_by" value="price_low_high" {% if sort_by == 'price_low_high' %}checked{% endif %}>
+                    <span>Price: Low to High</span>
+                  </label>
+
+                  <label>
+                    <input type="radio" name="sort_by" value="price_high_low" {% if sort_by == 'price_high_low' %}checked{% endif %}>
+                    <span>Price: High to Low</span>
+                  </label>
+
+                  <label>
+                    <input type="radio" name="sort_by" value="area_low_high" {% if sort_by == 'area_low_high' %}checked{% endif %}>
+                    <span>Area: Small to Large</span>
+                  </label>
+
+                  <label>
+                    <input type="radio" name="sort_by" value="area_high_low" {% if sort_by == 'area_high_low' %}checked{% endif %}>
+                    <span>Area: Large to Small</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- PRICE -->
+            <div class="filter-dropdown">
+              <button type="button" class="filter-btn dropdown-toggle" data-target="priceDropdown">
+                Price <i class="fa-solid fa-chevron-down"></i>
+              </button>
+
+              <div class="dropdown-panel" id="priceDropdown">
+                <div class="dropdown-header">
+                  <span>Price range</span>
+                  <button type="button" class="done-btn" data-close="priceDropdown">Done</button>
+                </div>
+
+                <div class="price-graph">
+                  <div class="bars">
+                    <span style="height: 90px;"></span>
+                    <span style="height: 15px;"></span>
+                    <span style="height: 10px;"></span>
+                    <span style="height: 12px;"></span>
+                    <span style="height: 18px;"></span>
+                    <span style="height: 26px;"></span>
+                    <span style="height: 20px;"></span>
+                    <span style="height: 14px;"></span>
+                    <span style="height: 10px;"></span>
+                    <span style="height: 8px;"></span>
+                    <span style="height: 6px;"></span>
+                    <span style="height: 5px;"></span>
+                    <span style="height: 4px;"></span>
+                    <span style="height: 3px;"></span>
+                  </div>
+                  <div class="slider-line">
+                    <div class="slider-dot left"></div>
+                    <div class="slider-dot right"></div>
+                  </div>
+                </div>
+
+                <div class="price-inputs">
+                  <div class="price-select">
+                    <span>$</span>
+                    <input type="number" name="min_price" placeholder="No min" value="{{ min_price or '' }}">
+                  </div>
+                  <div class="price-select">
+                    <span>$</span>
+                    <input type="number" name="max_price" placeholder="No max" value="{{ max_price or '' }}">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ROOMS -->
+            <div class="filter-dropdown">
+              <button type="button" class="filter-btn dropdown-toggle" data-target="roomsDropdown">
+                Rooms <i class="fa-solid fa-chevron-down"></i>
+              </button>
+
+              <div class="dropdown-panel rooms-panel" id="roomsDropdown">
+                <div class="dropdown-header">
+                  <span>Rooms</span>
+                  <button type="button" class="done-btn" data-close="roomsDropdown">Done</button>
+                </div>
+
+                <div class="room-group">
+                  <label>Bedrooms</label>
+                  <div class="segmented-grid">
+                    <label><input type="radio" name="bedrooms" value="any" {% if not selected_bedrooms or selected_bedrooms == 'any' %}checked{% endif %}><span>Any</span></label>
+                    <label><input type="radio" name="bedrooms" value="studio" {% if selected_bedrooms == 'studio' %}checked{% endif %}><span>Studio</span></label>
+                    <label><input type="radio" name="bedrooms" value="1" {% if selected_bedrooms == '1' %}checked{% endif %}><span>1</span></label>
+                    <label><input type="radio" name="bedrooms" value="2" {% if selected_bedrooms == '2' %}checked{% endif %}><span>2</span></label>
+                    <label><input type="radio" name="bedrooms" value="3" {% if selected_bedrooms == '3' %}checked{% endif %}><span>3</span></label>
+                    <label><input type="radio" name="bedrooms" value="4" {% if selected_bedrooms == '4' %}checked{% endif %}><span>4</span></label>
+                    <label><input type="radio" name="bedrooms" value="5+" {% if selected_bedrooms == '5+' %}checked{% endif %}><span>5+</span></label>
+                  </div>
+                </div>
+
+                <div class="room-group">
+                  <label>Bathrooms</label>
+                  <div class="segmented-grid">
+                    <label><input type="radio" name="bathrooms" value="any" {% if not selected_bathrooms or selected_bathrooms == 'any' %}checked{% endif %}><span>Any</span></label>
+                    <label><input type="radio" name="bathrooms" value="1" {% if selected_bathrooms == '1' %}checked{% endif %}><span>1</span></label>
+                    <label><input type="radio" name="bathrooms" value="2" {% if selected_bathrooms == '2' %}checked{% endif %}><span>2</span></label>
+                    <label><input type="radio" name="bathrooms" value="3" {% if selected_bathrooms == '3' %}checked{% endif %}><span>3</span></label>
+                    <label><input type="radio" name="bathrooms" value="4" {% if selected_bathrooms == '4' %}checked{% endif %}><span>4</span></label>
+                    <label><input type="radio" name="bathrooms" value="5+" {% if selected_bathrooms == '5+' %}checked{% endif %}><span>5+</span></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PROPERTY TYPE -->
+            <div class="filter-dropdown">
+              <button type="button" class="filter-btn dropdown-toggle" data-target="typeDropdown">
+                Property Type <i class="fa-solid fa-chevron-down"></i>
+              </button>
+
+              <div class="dropdown-panel type-panel" id="typeDropdown">
+                <div class="dropdown-header">
+                  <span>Property type</span>
+                  <button type="button" class="done-btn" data-close="typeDropdown">Done</button>
+                </div>
+
+                <div class="type-grid">
+                  <label>
+                    <input type="radio" name="type" value="apartment" {% if selected_type == 'apartment' %}checked{% endif %}>
+                    <span><i class="fa-solid fa-building"></i> Apartment</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="type" value="villa" {% if selected_type == 'villa' %}checked{% endif %}>
+                    <span><i class="fa-solid fa-house"></i> Villa</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="type" value="office" {% if selected_type == 'office' %}checked{% endif %}>
+                    <span><i class="fa-solid fa-briefcase"></i> Office</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="type" value="land" {% if selected_type == 'land' %}checked{% endif %}>
+                    <span><i class="fa-solid fa-tree"></i> Land</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="type" value="shop" {% if selected_type == 'shop' %}checked{% endif %}>
+                    <span><i class="fa-solid fa-shop"></i> Shop</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="type" value="penthouse" {% if selected_type == 'penthouse' %}checked{% endif %}>
+                    <span><i class="fa-solid fa-city"></i> Penthouse</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="type" value="townhouse" {% if selected_type == 'townhouse' %}checked{% endif %}>
+                    <span><i class="fa-solid fa-house-chimney"></i> Townhouse</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="type" value="duplex" {% if selected_type == 'duplex' %}checked{% endif %}>
+                    <span><i class="fa-solid fa-building-circle-arrow-right"></i> Duplex</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="type" value="studio" {% if selected_type == 'studio' %}checked{% endif %}>
+                    <span><i class="fa-solid fa-desktop"></i> Studio</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="filter-chip verified-chip">Apply Filters</button>
+
+            <label class="filter-chip checkbox-chip">
+              <input type="checkbox" name="generator" value="1" {% if generator == '1' %}checked{% endif %}>
+              <span>24/7 Electricity</span>
+            </label>
+
+            <label class="filter-chip checkbox-chip">
+              <input type="checkbox" name="balcony" value="1" {% if balcony == '1' %}checked{% endif %}>
+              <span>Balcony</span>
+            </label>
+
+            <label class="filter-chip checkbox-chip">
+              <input type="checkbox" name="elevator" value="1" {% if elevator == '1' %}checked{% endif %}>
+              <span>Elevator</span>
+            </label>
+
+            <label class="filter-chip checkbox-chip">
+              <input type="checkbox" name="furnished" value="1" {% if furnished == '1' %}checked{% endif %}>
+              <span>Furnished</span>
+            </label>
+
+            <label class="filter-chip checkbox-chip">
+              <input type="checkbox" name="parking" value="1" {% if parking == '1' %}checked{% endif %}>
+              <span>Parking</span>
+            </label>
+
+            <label class="filter-chip checkbox-chip">
+              <input type="checkbox" name="ac" value="1" {% if ac == '1' %}checked{% endif %}>
+              <span>AC</span>
+            </label>
+
+            <label class="filter-chip checkbox-chip">
+              <input type="checkbox" name="heating" value="1" {% if heating == '1' %}checked{% endif %}>
+              <span>Heating</span>
+            </label>
+
+            <label class="filter-chip checkbox-chip">
+              <input type="checkbox" name="solar_ready" value="1" {% if solar_ready == '1' %}checked{% endif %}>
+              <span>Solar Ready</span>
+            </label>
+
+            <a href="{{ url_for('rent') }}" class="clear-filters-btn">Clear</a>
+          </form>
+        </div>
+        <div class="duration-filter">
+          <span class="duration-label">Duration:</span>
+          <button type="button" class="duration-pill {% if not selected_duration %}active{% endif %}" data-duration="">
+            Any
+          </button>
+          <button type="button" class="duration-pill {% if selected_duration == 'daily' %}active{% endif %}" data-duration="daily">
+            Daily / Nightly
+          </button>
+          <button type="button" class="duration-pill {% if selected_duration == 'monthly' %}active{% endif %}" data-duration="monthly">
+            Monthly
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rental cards -->
+  <section class="rental-cards-section">
+    <div class="w3-content">
+      <div class="rental-grid">
+
+        {% for property in properties %}
+        <div class="rental-card">
+
+          <div class="favorite-form-wrap">
+            {% if current_user.is_authenticated %}
+              {% if property.id in favorite_ids %}
+                <form method="POST" action="{{ url_for('remove_favorite', favorite_id=favorite_map[property.id], next=request.full_path) }}">
+                  <button class="favorite-btn saved" type="submit" aria-label="Remove from favorites">
+                    <i class="fa-solid fa-heart"></i>
+                  </button>
+                </form>
+              {% else %}
+                <form method="POST" action="{{ url_for('add_favorite', property_id=property.id, next=request.full_path) }}">
+                  <button class="favorite-btn" type="submit" aria-label="Add to favorites">
+                    <i class="fa-solid fa-heart"></i>
+                  </button>
+                </form>
+              {% endif %}
+            {% else %}
+              <a href="{{ url_for('login') }}" class="favorite-btn" aria-label="Login to save">
+                <i class="fa-solid fa-heart"></i>
+              </a>
+            {% endif %}
+          </div>
+
+          <a href="{{ url_for('property_details', property_id=property.id) }}" class="rental-card-link">
+            <div class="rental-image-wrap">
+              <img src="{{ get_primary_image(property) }}" alt="{{ property.title }}">
+
+              <div class="rental-badges">
+                <span class="badge gray">{{ property.property_type|upper }}</span>
+                <span class="badge green">VERIFIED</span>
+              </div>
+            </div>
+
+            <div class="rental-card-body">
+              <div class="title-price-row">
+                <h3>{{ property.title }}</h3>
+                <div class="price-box">
+                  <span class="price">${{ "{:,.0f}".format(property.price_usd or 0) }}</span>
+                  <span class="period">
+                    {% if property.duration == "daily" %}
+                      /day
+                    {% else %}
+                      /month
+                    {% endif %}
+                  </span>
+                </div>
+              </div>
+
+              <div class="rental-meta">
+                <span><i class="fa-solid fa-bed"></i> {{ property.bedrooms }} Beds</span>
+                <span><i class="fa-solid fa-bath"></i> {{ property.bathrooms }} Baths</span>
+                <span><i class="fa-solid fa-ruler-combined"></i> {{ property.area_sqm }} m²</span>
+              </div>
+
+              <div class="bottom-insight-row">
+                <span class="insight-tag blue-tag">
+                  <i class="fa-solid fa-shield-halved"></i> Fair Market Price Insight
+                </span>
+                <span class="arrow-link">
+                  <i class="fa-solid fa-arrow-right"></i>
+                </span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+        {% else %}
+        <div class="no-results">
+          <p>No rental properties match your current filters.</p>
+        </div>
+        {% endfor %}
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+<footer class="footer-section">
+  <div class="w3-content footer-grid">
+    <div>
+      <h3>Bayti</h3>
+      <p>The modern standard for real estate in Lebanon. We bring transparency and trust to every home journey.</p>
+      <div class="footer-socials">
+        <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+        <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+      </div>
+    </div>
+
+    <div>
+      <h4>Discover</h4>
+      <a href="{{ url_for('buy') }}" class="bayti-link">Buy a Home</a>
+      <a href="{{ url_for('rent') }}" class="bayti-link">Rent a Home</a>
+      <a href="{{ url_for('sell') }}" class="bayti-link">Sell a Property</a>
+    </div>
+
+    <div>
+      <h4>Resources</h4>
+      <a href="{{ url_for('trust_certification') }}">Trust Certification</a>
+      <a href="{{ url_for('ai_insights_guide') }}">AI Insights Guide</a>
+      <a href="{{ url_for('report_abuse') }}">Report Abuse</a>
+    </div>
+
+    <div>
+      <h4>Company</h4>
+      <a href="{{ url_for('terms_of_service') }}">Terms of Service</a>
+      <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+      <a href="{{ url_for('cookies_settings') }}">Cookies Settings</a>
+      <a href="{{ url_for('contact_us') }}">Contact Us</a>
+    </div>
+  </div>
+
+  <div class="w3-content footer-bottom">
+    <p>© 2024 Bayti Real Estate Lebanon. All rights reserved.</p>
+    <span>DESIGNED FOR LEBANON</span>
+  </div>
+</footer>
+
+  <script>
+    function toggleMobileMenu() {
+      var x = document.getElementById("mobileMenu");
+      if (x.className.indexOf("w3-show") === -1) {
+        x.className += " w3-show";
+      } else {
+        x.className = x.className.replace(" w3-show", "");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const toggles = document.querySelectorAll(".dropdown-toggle");
+      const closeButtons = document.querySelectorAll("[data-close]");
+      const durationButtons = document.querySelectorAll(".duration-pill");
+      const durationInput = document.getElementById("durationInput");
+      const filtersForm = document.getElementById("rentFiltersForm");
+      const sortInputs = document.querySelectorAll('input[name="sort_by"]');
+
+      toggles.forEach(toggle => {
+        toggle.addEventListener("click", function (e) {
+          e.stopPropagation();
+          const targetId = this.dataset.target;
+          const targetPanel = document.getElementById(targetId);
+
+          document.querySelectorAll(".dropdown-panel").forEach(panel => {
+            if (panel !== targetPanel) {
+              panel.classList.remove("open");
+            }
+          });
+
+          if (targetPanel) {
+            targetPanel.classList.toggle("open");
+          }
+        });
+      });
+
+      closeButtons.forEach(button => {
+        button.addEventListener("click", function () {
+          const panelId = this.dataset.close;
+          const panel = document.getElementById(panelId);
+          if (panel) {
+            panel.classList.remove("open");
+          }
+        });
+      });
+
+      document.addEventListener("click", function (e) {
+        if (!e.target.closest(".filter-dropdown")) {
+          document.querySelectorAll(".dropdown-panel").forEach(panel => {
+            panel.classList.remove("open");
+          });
+        }
+      });
+
+      durationButtons.forEach(button => {
+        button.addEventListener("click", function () {
+          durationButtons.forEach(btn => btn.classList.remove("active"));
+          this.classList.add("active");
+          if (durationInput) {
+            durationInput.value = this.dataset.duration;
+          }
+          if (filtersForm) {
+            filtersForm.submit();
+          }
+        });
+      });
+
+      sortInputs.forEach(input => {
+        input.addEventListener("change", function () {
+          if (filtersForm) {
+            filtersForm.submit();
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

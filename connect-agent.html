@@ -1,0 +1,108 @@
+<!-- Trigger button example -->
+<button class="connect-agent-trigger" onclick="openAgentModal()">
+  Connect with Agent
+</button>
+
+<!-- Modal -->
+<div id="agentModal" class="agent-modal-overlay">
+  <div class="agent-modal-box w3-animate-opacity">
+    <div class="agent-modal-header">
+      <h2>Connect with an agent</h2>
+      <button class="agent-close-btn" onclick="closeAgentModal()" aria-label="Close modal">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="agent-modal-body">
+      <div class="agent-home-icon">
+        <i class="fa-solid fa-house"></i>
+      </div>
+
+      <h3>Let Bayti help you find a local real estate agent</h3>
+
+      <form class="agent-form">
+        <div class="form-group">
+          <div class="label-row">
+            <label for="goal">Choose an option:</label>
+            <span>required</span>
+          </div>
+          <div class="input-icon-wrap select-wrap">
+            <select id="goal" name="goal" required>
+              <option value="">I want to buy a home</option>
+              <option>I want to rent a home</option>
+              <option>I want to sell a property</option>
+              <option>I want to list my property</option>
+              <option>I want investment advice</option>
+            </select>
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="label-row">
+            <label for="location">Where are you buying?</label>
+            <span>required</span>
+          </div>
+          <div class="input-icon-wrap">
+            <input id="location" type="text" name="location" placeholder="Enter zip code" required>
+            <i class="fa-regular fa-map"></i>
+          </div>
+        </div>
+
+        <h4>Your information</h4>
+
+        <div class="form-group">
+          <div class="input-icon-wrap">
+            <input id="fullname" type="text" name="fullname" placeholder="Full name*" required>
+            <i class="fa-regular fa-user"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="input-icon-wrap">
+            <input id="email" type="email" name="email" placeholder="Email*" required>
+            <i class="fa-regular fa-envelope"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="input-icon-wrap">
+            <input id="phone" type="tel" name="phone" placeholder="Phone*" required>
+            <i class="fa-solid fa-phone"></i>
+          </div>
+        </div>
+
+        <p class="agent-consent">
+          By proceeding, you consent to receive calls and texts at the number you provided,
+          including marketing by automated and prerecorded means, and email, from Bayti and
+          partners about your inquiry and other home-related matters, but not as a condition
+          of any purchase.
+        </p>
+
+        <div class="agent-modal-actions">
+          <button type="button" class="cancel-btn" onclick="closeAgentModal()">Cancel</button>
+          <button type="submit" class="send-btn">Send</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openAgentModal() {
+    document.getElementById("agentModal").classList.add("show");
+    document.body.classList.add("modal-open");
+  }
+
+  function closeAgentModal() {
+    document.getElementById("agentModal").classList.remove("show");
+    document.body.classList.remove("modal-open");
+  }
+
+  window.addEventListener("click", function (e) {
+    const modal = document.getElementById("agentModal");
+    if (e.target === modal) {
+      closeAgentModal();
+    }
+  });
+</script>

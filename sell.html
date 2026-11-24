@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bayti - Sell Property</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/sell.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <div class="w3-top">
+    <div class="w3-bar bayti-navbar">
+      <div class="bayti-logo">
+        <a href="{{ url_for('home') }}" class="navbar-logo-link">
+          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Bayti Logo" class="navbar-logo">
+        </a>
+      </div>
+
+      <div class="bayti-nav-center">
+        <a href="{{ url_for('buy') }}" class="bayti-link">Buy</a>
+        <a href="{{ url_for('rent') }}" class="bayti-link">Rent</a>
+        <a href="{{ url_for('sell') }}" class="bayti-link">Sell</a>
+        <a href="{{ url_for('find_agent') }}" class="bayti-link">Find an Agent</a>
+        <a href="{{ url_for('ai_assistant') }}" class="bayti-link">HomesyAI</a>
+      </div>
+
+      <div class="bayti-nav-right">
+        <a href="{{ url_for('favorites') }}" class="favorites-link">
+          <i class="fa-solid fa-heart"></i>
+        </a>
+
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('dashboard') }}" class="bayti-login">Dashboard</a>
+          <a href="{{ url_for('logout') }}" class="bayti-signup">Logout</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="bayti-login">Login</a>
+          <a href="{{ url_for('signup') }}" class="bayti-signup">Sign Up</a>
+        {% endif %}
+      </div>
+
+      <a href="javascript:void(0)" class="bayti-menu-btn" onclick="toggleMobileMenu()">
+        <i class="fa-solid fa-bars"></i>
+      </a>
+    </div>
+
+    <div id="mobileMenu" class="w3-bar-block bayti-mobile-menu w3-hide">
+      <a href="{{ url_for('buy') }}" class="w3-bar-item w3-button">Buy</a>
+      <a href="{{ url_for('rent') }}" class="w3-bar-item w3-button">Rent</a>
+      <a href="{{ url_for('sell') }}" class="w3-bar-item w3-button">Sell or Rent</a>
+      <a href="{{ url_for('find_agent') }}" class="w3-bar-item w3-button">Find an Agent</a>
+      <a href="{{ url_for('ai_assistant') }}" class="w3-bar-item w3-button">HomesyAI</a>
+    </div>
+  </div>
+
+  <main class="sell-page">
+    <div class="w3-content page-wrap">
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div style="margin: 12px 0 20px;">
+            {% for category, message in messages %}
+              <div style="padding:12px 16px; border-radius:10px; margin-bottom:10px; background:{% if category == 'success' %}#dcfce7{% else %}#fee2e2{% endif %}; color:#111827;">
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <section class="intro-section">
+        <div class="intro-text">
+          <h1>Estimate the fair value of your property</h1>
+          <p>
+            Leverage Lebanon's AI-powered real estate ledger. Accurate market valuations based on real-time comps, property features, and local living standards.
+          </p>
+        </div>
+      </section>
+
+      <form method="POST" enctype="multipart/form-data" id="sellForm">
+        <input type="hidden" name="goal" id="goalInput" value="{{ form_data.get('goal', 'sell') }}">
+        <input type="hidden" name="action" id="actionInput" value="estimate">
+
+        <section class="main-layout">
+          <div class="form-column">
+
+            <div class="panel-box">
+              <h2>What is your primary goal?</h2>
+
+              <div class="goal-grid">
+                <button type="button" class="goal-card {% if form_data.get('goal', 'sell') == 'sell' %}active{% endif %}" data-goal="sell">
+                  <i class="fa-solid fa-tag"></i>
+                  <span>Sell</span>
+                </button>
+
+                <button type="button" class="goal-card {% if form_data.get('goal') == 'rent_long_term' %}active{% endif %}" data-goal="rent_long_term">
+                  <i class="fa-regular fa-calendar"></i>
+                  <span>Rent Long-Term</span>
+                </button>
+
+                <button type="button" class="goal-card {% if form_data.get('goal') == 'rent_short_term' %}active{% endif %}" data-goal="rent_short_term">
+                  <i class="fa-solid fa-plane"></i>
+                  <span>Rent Short-Term</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="panel-box">
+              <h2><i class="fa-solid fa-building"></i> Core Property Details</h2>
+
+              <div class="form-grid two-col">
+                <div class="field-group">
+                  <label>LOCATION</label>
+                  <input type="text" name="location" value="{{ form_data.get('location', '') }}" placeholder="e.g. Ashrafieh, Mar Mikhael" required>
+                </div>
+
+                <div class="field-group">
+                  <label>PROPERTY TYPE</label>
+                  {% set pt = form_data.get('property_type', 'Apartment') %}
+                  <select name="property_type" required>
+                    <option value="Apartment" {% if pt == 'Apartment' %}selected{% endif %}>Apartment</option>
+                    <option value="Villa" {% if pt == 'Villa' %}selected{% endif %}>Villa</option>
+                    <option value="Studio" {% if pt == 'Studio' %}selected{% endif %}>Studio</option>
+                    <option value="Office" {% if pt == 'Office' %}selected{% endif %}>Office</option>
+                    <option value="Office" {% if pt == 'Shop' %}selected{% endif %}>Shop</option>
+                    <option value="Office" {% if pt == 'Penthouse' %}selected{% endif %}>Penthouse</option>
+                    <option value="Office" {% if pt == 'Townhouse' %}selected{% endif %}>Townhouse</option>
+                  </select>
+                </div>
+
+                <div class="field-group">
+                  <label>SIZE (SQM)</label>
+                  <input type="number" step="0.01" min="1" name="size_sqm" value="{{ form_data.get('size_sqm', '') }}" placeholder="150" required>
+                </div>
+
+                <div class="field-group">
+                  <label>OVERALL CONDITION</label>
+                  {% set cond = form_data.get('overall_condition', 'Good') %}
+                  <select name="overall_condition" required>
+                    <option value="Brand New / Under Construction" {% if cond == 'Brand New / Under Construction' %}selected{% endif %}>Brand New / Under Construction</option>
+                    <option value="Excellent" {% if cond == 'Excellent' %}selected{% endif %}>Excellent</option>
+                    <option value="Good" {% if cond == 'Good' %}selected{% endif %}>Good</option>
+                    <option value="Needs Renovation" {% if cond == 'Needs Renovation' %}selected{% endif %}>Needs Renovation</option>
+                  </select>
+                </div>
+
+                <div class="field-group">
+                  <label>BEDROOMS</label>
+                  <input type="number" min="0" name="bedrooms" value="{{ form_data.get('bedrooms', '') }}" placeholder="3">
+                </div>
+
+                <div class="field-group">
+                  <label>BATHROOMS</label>
+                  <input type="number" min="1" name="bathrooms" value="{{ form_data.get('bathrooms', '') }}" placeholder="2">
+                </div>
+
+                <div class="field-group">
+                  <label>YEAR BUILT</label>
+                  <input type="number" min="1900" max="2035" name="year_built" value="{{ form_data.get('year_built', '') }}" placeholder="2018">
+                </div>
+
+                <div class="field-group">
+                  <label>PARKING SPACES</label>
+                  <input type="number" min="0" name="parking_spaces" value="{{ form_data.get('parking_spaces', '') }}" placeholder="1">
+                </div>
+
+                <div class="field-group">
+                  <label>FLOOR NUMBER</label>
+                  <input type="number" min="0" name="floor_number" value="{{ form_data.get('floor_number', '') }}" placeholder="4">
+                </div>
+
+                <div class="field-group">
+                  <label>TOTAL FLOORS</label>
+                  <input type="number" min="1" name="total_floors" value="{{ form_data.get('total_floors', '') }}" placeholder="10">
+                </div>
+              </div>
+
+              <div class="subsection-title"><i class="fa-solid fa-couch"></i> Interior & Access</div>
+
+              <div class="feature-grid">
+                <div class="feature-card">
+                  <label>Furnished</label>
+                  {% set furnished = form_data.get('furnished', False) %}
+                  <div class="toggle-group">
+                    <button type="button" class="toggle-btn furnished-btn {% if furnished %}active-blue{% endif %}" data-value="yes">Yes</button>
+                    <button type="button" class="toggle-btn furnished-btn {% if not furnished %}active-blue{% endif %}" data-value="no">No</button>
+                  </div>
+                  <input type="hidden" name="furnished" id="furnishedInput" value="{% if furnished %}yes{% else %}no{% endif %}">
+                </div>
+
+                <div class="feature-card">
+                  <label>Elevator</label>
+                  {% set elevator = form_data.get('elevator', False) %}
+                  <div class="toggle-group">
+                    <button type="button" class="toggle-btn elevator-btn {% if elevator %}active-blue{% endif %}" data-value="yes">Yes</button>
+                    <button type="button" class="toggle-btn elevator-btn {% if not elevator %}active-blue{% endif %}" data-value="no">No</button>
+                  </div>
+                  <input type="hidden" name="elevator" id="elevatorInput" value="{% if elevator %}yes{% else %}no{% endif %}">
+                </div>
+
+                <div class="feature-card">
+                  <label>Balcony</label>
+                  {% set balcony = form_data.get('balcony', False) %}
+                  <div class="toggle-group">
+                    <button type="button" class="toggle-btn balcony-btn {% if balcony %}active-blue{% endif %}" data-value="yes">Yes</button>
+                    <button type="button" class="toggle-btn balcony-btn {% if not balcony %}active-blue{% endif %}" data-value="no">No</button>
+                  </div>
+                  <input type="hidden" name="balcony" id="balconyInput" value="{% if balcony %}yes{% else %}no{% endif %}">
+                </div>
+
+                <div class="feature-card">
+                  <label>Heating</label>
+                  {% set heating = form_data.get('heating', False) %}
+                  <div class="toggle-group">
+                    <button type="button" class="toggle-btn heating-btn {% if heating %}active-blue{% endif %}" data-value="yes">Yes</button>
+                    <button type="button" class="toggle-btn heating-btn {% if not heating %}active-blue{% endif %}" data-value="no">No</button>
+                  </div>
+                  <input type="hidden" name="heating" id="heatingInput" value="{% if heating %}yes{% else %}no{% endif %}">
+                </div>
+
+                <div class="feature-card">
+                  <label>Air Conditioning</label>
+                  {% set ac = form_data.get('ac', False) %}
+                  <div class="toggle-group">
+                    <button type="button" class="toggle-btn ac-btn {% if ac %}active-blue{% endif %}" data-value="yes">Yes</button>
+                    <button type="button" class="toggle-btn ac-btn {% if not ac %}active-blue{% endif %}" data-value="no">No</button>
+                  </div>
+                  <input type="hidden" name="ac" id="acInput" value="{% if ac %}yes{% else %}no{% endif %}">
+                </div>
+              </div>
+
+              <div class="subsection-title"><i class="fa-solid fa-bolt"></i> Lebanon Living Standards</div>
+
+              <div class="standards-grid standards-grid-four">
+                <div class="standard-card">
+                  <label>Solar System</label>
+                  <div class="toggle-group">
+                    <button type="button" class="toggle-btn solar-btn {% if form_data.get('solar_system', True) %}active-green{% endif %}" data-value="yes">Yes</button>
+                    <button type="button" class="toggle-btn solar-btn {% if not form_data.get('solar_system', True) %}active-green{% endif %}" data-value="no">No</button>
+                  </div>
+                  <input type="hidden" name="solar_system" id="solarSystemInput" value="{% if form_data.get('solar_system', True) %}yes{% else %}no{% endif %}">
+                </div>
+
+                <div class="standard-card">
+                  <label>Water Security</label>
+                  {% set water = form_data.get('water_security', 'Artesian Well') %}
+                  <select name="water_security">
+                    <option value="Artesian Well" {% if water == 'Artesian Well' %}selected{% endif %}>Artesian Well</option>
+                    <option value="Water Tank" {% if water == 'Water Tank' %}selected{% endif %}>Water Tank</option>
+                    <option value="Municipal Only" {% if water == 'Municipal Only' %}selected{% endif %}>Municipal Only</option>
+                  </select>
+                </div>
+
+                <div class="standard-card">
+                  <label>Electricity</label>
+                  {% set elec = form_data.get('electricity', '24/7 (Private Gen)') %}
+                  <select name="electricity">
+                    <option value="24/7 (Private Gen)" {% if elec == '24/7 (Private Gen)' %}selected{% endif %}>24/7 (Private Gen)</option>
+                    <option value="EDL + Generator" {% if elec == 'EDL + Generator' %}selected{% endif %}>EDL + Generator</option>
+                    <option value="Solar + EDL" {% if elec == 'Solar + EDL' %}selected{% endif %}>Solar + EDL</option>
+                  </select>
+                </div>
+
+                <div class="standard-card">
+                  <label>Generator Capacity</label>
+                  {% set gen_cap = form_data.get('generator_cap', '') %}
+                  <select name="generator_cap">
+                    <option value="" {% if gen_cap == '' %}selected{% endif %}>Select</option>
+                    <option value="5A" {% if gen_cap == '5A' %}selected{% endif %}>5A</option>
+                    <option value="10A" {% if gen_cap == '10A' %}selected{% endif %}>10A</option>
+                    <option value="15A" {% if gen_cap == '15A' %}selected{% endif %}>15A</option>
+                    <option value="20A+" {% if gen_cap == '20A+' %}selected{% endif %}>20A+</option>
+                  </select>
+                </div>
+
+                <div class="standard-card">
+                  <label>Tank Capacity</label>
+                  {% set tank = form_data.get('tank_capacity', '') %}
+                  <select name="tank_capacity">
+                    <option value="" {% if tank == '' %}selected{% endif %}>Select</option>
+                    <option value="Small" {% if tank == 'Small' %}selected{% endif %}>Small</option>
+                    <option value="Medium" {% if tank == 'Medium' %}selected{% endif %}>Medium</option>
+                    <option value="Large" {% if tank == 'Large' %}selected{% endif %}>Large</option>
+                  </select>
+                </div>
+
+                <div class="standard-card">
+                  <label>Filtration</label>
+                  {% set filtration = form_data.get('filtration', '') %}
+                  <select name="filtration">
+                    <option value="" {% if filtration == '' %}selected{% endif %}>Select</option>
+                    <option value="Installed" {% if filtration == 'Installed' %}selected{% endif %}>Installed</option>
+                    <option value="Not Installed" {% if filtration == 'Not Installed' %}selected{% endif %}>Not Installed</option>
+                  </select>
+                </div>
+
+                <div class="standard-card">
+                  <label>Traffic Level</label>
+                  {% set traffic = form_data.get('traffic_level', '') %}
+                  <select name="traffic_level">
+                    <option value="" {% if traffic == '' %}selected{% endif %}>Select</option>
+                    <option value="Low" {% if traffic == 'Low' %}selected{% endif %}>Low</option>
+                    <option value="Medium" {% if traffic == 'Medium' %}selected{% endif %}>Medium</option>
+                    <option value="High" {% if traffic == 'High' %}selected{% endif %}>High</option>
+                  </select>
+                </div>
+
+                <div class="standard-card">
+                  <label>Quiet / Area Profile</label>
+                  {% set quiet = form_data.get('quiet_hours', '') %}
+                  <select name="quiet_hours">
+                    <option value="" {% if quiet == '' %}selected{% endif %}>Select</option>
+                    <option value="Very Quiet" {% if quiet == 'Very Quiet' %}selected{% endif %}>Very Quiet</option>
+                    <option value="Moderate" {% if quiet == 'Moderate' %}selected{% endif %}>Moderate</option>
+                    <option value="Busy Area" {% if quiet == 'Busy Area' %}selected{% endif %}>Busy Area</option>
+                    <option value="10 PM - 7 AM" {% if quiet == '10 PM - 7 AM' %}selected{% endif %}>10 PM - 7 AM</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="subsection-title"><i class="fa-solid fa-image"></i> Media & Tours</div>
+
+              <div class="upload-box">
+                <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                <h3>Upload images of your property</h3>
+                <p>High-quality photos improve listing quality and future AI assistance</p>
+
+                <input type="file" name="images" id="imageInput" multiple accept=".jpg,.jpeg,.png,.webp" style="margin-bottom: 18px;">
+
+                <div class="upload-previews" id="previewContainer">
+                  {% for img in uploaded_images %}
+                    <div class="preview-thumb">
+                      <img src="{{ url_for('static', filename=img.replace('static/', '')) }}" alt="Property preview">
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <div class="bottom-cards">
+              <div class="estimate-card">
+                <div class="estimate-top">
+                  <span class="estimate-label">ESTIMATED VALUE RANGE</span>
+                  <span class="confidence-pill">
+                    {{ valuation.confidence_score if valuation else 0 }}% Confidence
+                  </span>
+                </div>
+
+                <div class="estimate-price">
+                  {% if valuation %}
+                    ${{ "{:,}".format(valuation.low_estimate) }} —<br>
+                    ${{ "{:,}".format(valuation.high_estimate) }}
+                  {% else %}
+                    $0 —<br>$0
+                  {% endif %}
+                </div>
+
+                <p>
+                  {% if valuation %}
+                    Suggested listing price: <strong>${{ "{:,}".format(valuation.suggested_price) }}</strong>
+                  {% else %}
+                    Fill in the form to generate a data-driven estimate.
+                  {% endif %}
+                </p>
+
+                <button type="submit" class="publish-btn" onclick="setAction('publish')">PUBLISH LISTING NOW</button>
+              </div>
+
+              <div class="explain-card">
+                <h3><i class="fa-solid fa-chart-column"></i> Why this price?</h3>
+
+                <div class="explain-list">
+                  <div class="explain-row">
+                    <span>Local Comps (Avg)</span>
+                    <strong>
+                      {% if valuation %}${{ "{:,.0f}".format(valuation.explanation.local_comps_avg_ppsqm) }}/sqm{% else %}$0/sqm{% endif %}
+                    </strong>
+                  </div>
+                  <div class="explain-row">
+                    <span>Market Position</span>
+                    <strong class="green-text">
+                      {% if valuation %}{{ valuation.explanation.market_trend }}{% else %}—{% endif %}
+                    </strong>
+                  </div>
+                  <div class="explain-row">
+                    <span>Condition Factor</span>
+                    <strong>
+                      {% if valuation %}{{ valuation.explanation.condition_factor }}{% else %}—{% endif %}
+                    </strong>
+                  </div>
+                  <div class="explain-row">
+                    <span>Comparable Listings Used</span>
+                    <strong>
+                      {% if valuation %}{{ valuation.explanation.num_comps }}{% else %}0{% endif %}
+                    </strong>
+                  </div>
+                </div>
+
+                <div class="explain-actions">
+                  <button type="submit" class="draft-btn" onclick="setAction('save_draft')">Save Draft</button>
+                  <button type="submit" class="contact-btn" onclick="setAction('estimate')">Generate Estimate</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="sidebar-column">
+            <div class="ai-card">
+              <div class="ai-header">
+                <div class="ai-title-wrap">
+                  <div class="ai-avatar"><i class="fa-solid fa-robot"></i></div>
+                  <div>
+                    <h3>HomesyAI</h3>
+                    <span>ONLINE • MARKET EXPERT</span>
+                  </div>
+                </div>
+                <button class="dots-btn" type="button"><i class="fa-solid fa-ellipsis"></i></button>
+              </div>
+
+              <div class="chat-area">
+                <div class="chat-bubble">
+                  {% if ai_summary %}
+                    {{ ai_summary }}
+                  {% else %}
+                    Fill in the form and click Generate Estimate. I will explain the valuation based on your model output, local market conditions, and comparable listings.
+                  {% endif %}
+                </div>
+
+                {% if valuation %}
+                <div class="chat-bubble">
+                  Your estimate uses local market benchmarks around ${{ "{:,.0f}".format(valuation.explanation.local_comps_avg_ppsqm) }}/sqm and compares your property against {{ valuation.explanation.num_comps }} relevant listing(s).
+                </div>
+                {% endif %}
+              </div>
+
+              <div class="chat-input-row">
+                <input type="text" placeholder="AI chat can be connected next">
+                <button type="button"><i class="fa-solid fa-arrow-up"></i></button>
+              </div>
+
+              <p class="ai-disclaimer">VERIFY ALL VALUES WITH A LICENSED AGENT BEFORE FINAL SALE DECISIONS.</p>
+            </div>
+
+            <div class="comparables-card">
+              <h4>Nearby Comparable Sales</h4>
+
+              {% if comparables %}
+                {% for comp in comparables %}
+                  <div class="comp-item">
+                    <div class="comp-rank {% if loop.index == 2 %}second{% endif %}">
+                      {{ loop.index }}
+                    </div>
+                    <div class="comp-text">
+                      <strong>${{ "{:,}".format(comp.price|int) }}</strong>
+                      <span>{{ comp.city }}{% if comp.district %} • {{ comp.district }}{% endif %} • {{ comp.area_sqm }} sqm • ${{ "{:,.0f}".format(comp.price_per_sqm) }}/sqm</span>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% else %}
+                <p style="margin:0; color:#6b7280; font-size:13px;">No comparable results yet. Generate an estimate first.</p>
+              {% endif %}
+            </div>
+          </aside>
+        </section>
+      </form>
+    </div>
+  </main>
+
+  <footer class="footer-section">
+    <div class="w3-content footer-grid">
+      <div>
+        <h3>Bayti</h3>
+        <p>The modern standard for real estate in Lebanon. We bring transparency and trust to every home journey.</p>
+        <div class="footer-socials">
+          <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+        </div>
+      </div>
+
+      <div>
+        <h4>Discover</h4>
+        <a href="{{ url_for('buy') }}" class="bayti-link">Buy a Home</a>
+        <a href="{{ url_for('rent') }}" class="bayti-link">Rent a Home</a>
+        <a href="{{ url_for('sell') }}" class="bayti-link">Sell a Property</a>
+      </div>
+
+      <div>
+        <h4>Resources</h4>
+        <a href="{{ url_for('trust_certification') }}">Trust Certification</a>
+        <a href="{{ url_for('ai_insights_guide') }}">AI Insights Guide</a>
+        <a href="{{ url_for('report_abuse') }}">Report Abuse</a>
+      </div>
+
+      <div>
+        <h4>Company</h4>
+        <a href="{{ url_for('terms_of_service') }}">Terms of Service</a>
+        <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+        <a href="{{ url_for('cookies_settings') }}">Cookies Settings</a>
+        <a href="{{ url_for('contact_us') }}">Contact Us</a>
+      </div>
+    </div>
+
+    <div class="w3-content footer-bottom">
+      <p>© 2024 Bayti Real Estate Lebanon. All rights reserved.</p>
+      <span>DESIGNED FOR LEBANON</span>
+    </div>
+  </footer>
+
+  <script>
+    function toggleMobileMenu() {
+      var x = document.getElementById("mobileMenu");
+      if (x.className.indexOf("w3-show") === -1) {
+        x.className += " w3-show";
+      } else {
+        x.className = x.className.replace(" w3-show", "");
+      }
+    }
+
+    function setAction(action) {
+      document.getElementById("actionInput").value = action;
+    }
+
+    function setupToggleButtons(buttonSelector, hiddenInputId, activeClass) {
+      const buttons = document.querySelectorAll(buttonSelector);
+      const hiddenInput = document.getElementById(hiddenInputId);
+
+      buttons.forEach(btn => {
+        btn.addEventListener("click", function () {
+          buttons.forEach(b => b.classList.remove(activeClass));
+          this.classList.add(activeClass);
+          hiddenInput.value = this.dataset.value;
+        });
+      });
+    }
+
+    const goalButtons = document.querySelectorAll(".goal-card");
+    const goalInput = document.getElementById("goalInput");
+
+    goalButtons.forEach(btn => {
+      btn.addEventListener("click", function () {
+        goalButtons.forEach(b => b.classList.remove("active"));
+        this.classList.add("active");
+        goalInput.value = this.dataset.goal;
+      });
+    });
+
+    setupToggleButtons(".solar-btn", "solarSystemInput", "active-green");
+    setupToggleButtons(".furnished-btn", "furnishedInput", "active-blue");
+    setupToggleButtons(".elevator-btn", "elevatorInput", "active-blue");
+    setupToggleButtons(".balcony-btn", "balconyInput", "active-blue");
+    setupToggleButtons(".heating-btn", "heatingInput", "active-blue");
+    setupToggleButtons(".ac-btn", "acInput", "active-blue");
+
+    const imageInput = document.getElementById("imageInput");
+    const previewContainer = document.getElementById("previewContainer");
+
+    if (imageInput) {
+      imageInput.addEventListener("change", function () {
+        previewContainer.innerHTML = "";
+
+        Array.from(this.files).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const div = document.createElement("div");
+            div.className = "preview-thumb";
+            div.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+            previewContainer.appendChild(div);
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

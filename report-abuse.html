@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Report Price Abuse | Bayti</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/report-abuse.css') }}">
+</head>
+<body>
+
+  <div class="page-wrapper">
+
+    <div class="top-bar">
+      <a href="{{ url_for('home') }}" class="back-link">← Back to homepage</a>
+    </div>
+
+    <div class="hero-box">
+      <h1>Report Price Abuse</h1>
+      <p>
+        Help us keep Bayti transparent and fair. If you notice a suspicious listing,
+        unrealistic pricing, or misleading market behavior, submit a report for review.
+      </p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-wrapper">
+          {% for category, message in messages %}
+            <div class="flash-message {{ category }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="report-layout">
+
+      <div class="report-card">
+        <h2 class="card-title">Submit a report</h2>
+        <p class="card-subtitle">
+          Fill in the form below. Fields marked with * are required.
+        </p>
+
+        <form method="POST" action="{{ url_for('report_abuse') }}">
+          <div class="form-grid">
+
+            <div class="form-group full">
+              <label for="listing_link">Listing link or property URL</label>
+              <input
+                type="text"
+                id="listing_link"
+                name="listing_link"
+                placeholder="Paste the property link here"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="property_title">Property title *</label>
+              <input
+                type="text"
+                id="property_title"
+                name="property_title"
+                placeholder="e.g. 3-Bedroom Apartment in Achrafieh"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="location">Location *</label>
+              <input
+                type="text"
+                id="location"
+                name="location"
+                placeholder="City / District / Neighborhood"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="listed_price">Listed price (USD) *</label>
+              <input
+                type="number"
+                id="listed_price"
+                name="listed_price"
+                placeholder="e.g. 250000"
+                step="0.01"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="expected_price">Expected fair price (USD)</label>
+              <input
+                type="number"
+                id="expected_price"
+                name="expected_price"
+                placeholder="e.g. 180000"
+                step="0.01"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="report_type">Reason for report *</label>
+              <select id="report_type" name="report_type" required>
+                <option value="">Select a reason</option>
+                <option value="Price significantly above market">Price significantly above market</option>
+                <option value="Sudden unexplained price increase">Sudden unexplained price increase</option>
+                <option value="Misleading property details">Misleading property details</option>
+                <option value="Fake or duplicate listing">Fake or duplicate listing</option>
+                <option value="Suspicious exploitation during crisis">Suspicious exploitation during crisis</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="contact_email">Your email</label>
+              <input
+                type="email"
+                id="contact_email"
+                name="contact_email"
+                placeholder="name@example.com"
+              >
+              <div class="hint">Optional, if you want updates on your report.</div>
+            </div>
+
+            <div class="form-group full">
+              <label for="details">Why do you believe this price is abusive? *</label>
+              <textarea
+                id="details"
+                name="details"
+                placeholder="Explain why this listing seems unfair or suspicious."
+                required
+              ></textarea>
+            </div>
+
+            <div class="form-group full">
+              <label for="evidence">Evidence or additional notes</label>
+              <textarea
+                id="evidence"
+                name="evidence"
+                placeholder="Examples: nearby cheaper listings, old price screenshots, poor condition, misleading photos, or market comparison notes."
+              ></textarea>
+            </div>
+
+            <div class="form-group full">
+              <div class="checkbox-row">
+                <input type="checkbox" id="confirm" name="confirm" required>
+                <label for="confirm">
+                  I confirm that this report is submitted in good faith and that the information provided is accurate to the best of my knowledge.
+                </label>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="btn-row">
+            <button type="submit" class="btn-primary">Submit report</button>
+            <button type="reset" class="btn-secondary">Clear form</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="info-column">
+        <div class="status-box">
+          <h3>Fair housing matters</h3>
+          <p>
+            Bayti aims to reduce exploitative pricing and improve transparency in the Lebanese real estate market.
+          </p>
+          <div class="status-pill">Market fairness review enabled</div>
+        </div>
+
+        <div class="info-card">
+          <h3>What happens after submission?</h3>
+          <p>
+            Reports are reviewed based on listing details, local context, comparable properties, and repeated complaints.
+          </p>
+        </div>
+
+        <div class="info-card">
+          <h3>Useful evidence to include</h3>
+          <ul>
+            <li>Links to similar nearby properties with lower prices</li>
+            <li>Older screenshots showing previous prices</li>
+            <li>Notes on poor condition or misleading listing details</li>
+            <li>Evidence of crisis-related price inflation</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

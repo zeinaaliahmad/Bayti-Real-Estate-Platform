@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bayti - Homepage</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+
+
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="w3-top">
+  <div class="w3-bar bayti-navbar">
+
+    <div class="bayti-logo">
+      <a href="{{ url_for('home') }}" class="navbar-logo-link">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Bayti Logo" class="navbar-logo">
+      </a>
+    </div>
+
+    <div class="bayti-nav-center">
+      <a href="{{ url_for('buy') }}" class="bayti-link">Buy</a>
+      <a href="{{ url_for('rent') }}" class="bayti-link">Rent</a>
+      <a href="{{ url_for('sell') }}" class="bayti-link">Sell</a>
+      <a href="{{ url_for('find_agent') }}" class="bayti-link">Find an Agent</a>
+      <a href="{{ url_for('ai_assistant') }}" class="bayti-link">HomesyAI</a>
+    </div>
+
+    <div class="bayti-nav-right">
+      <a href="{{ url_for('favorites') }}" class="favorites-link">
+        <i class="fa-solid fa-heart"></i>
+      </a>
+
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard') }}" class="bayti-login">Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="bayti-signup">Logout</a>
+      {% else %}
+        <a href="{{ url_for('login') }}" class="bayti-login">Login</a>
+        <a href="{{ url_for('signup') }}" class="bayti-signup">Sign Up</a>
+      {% endif %}
+    </div>
+
+    <a href="javascript:void(0)" class="bayti-menu-btn" onclick="toggleMobileMenu()">
+      <i class="fa-solid fa-bars"></i>
+    </a>
+  </div>
+
+  <div id="mobileMenu" class="w3-bar-block bayti-mobile-menu w3-hide">
+    <a href="{{ url_for('buy') }}" class="w3-bar-item w3-button">Buy</a>
+    <a href="{{ url_for('rent') }}" class="w3-bar-item w3-button">Rent</a>
+    <a href="{{ url_for('sell') }}" class="w3-bar-item w3-button">Sell or Rent my Property</a>
+    <a href="{{ url_for('find_agent') }}" class="w3-bar-item w3-button">Find an Agent</a>
+    <a href="{{ url_for('ai_assistant') }}" class="w3-bar-item w3-button">AI Assistant</a>
+    {% if current_user.is_authenticated %}
+      <a href="{{ url_for('dashboard') }}" class="w3-bar-item w3-button bayti-mobile-signin">Dashboard</a>
+      <a href="{{ url_for('logout') }}" class="w3-bar-item w3-button bayti-mobile-signin">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}" class="w3-bar-item w3-button bayti-mobile-signin">Sign In</a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Hero -->
+<header class="hero-section">
+  <div class="hero-carousel">
+    <img class="carousel-slide active" src="{{ url_for('static', filename='images/hero1.png') }}" alt="House 1">
+    <img class="carousel-slide" src="{{ url_for('static', filename='images/hero2.png') }}" alt="House 2">
+    <img class="carousel-slide" src="{{ url_for('static', filename='images/hero3.png') }}" alt="House 3">
+    <img class="carousel-slide" src="{{ url_for('static', filename='images/hero4.png') }}" alt="House 4">
+    <img class="carousel-slide" src="{{ url_for('static', filename='images/hero5.png') }}" alt="House 5">
+    <img class="carousel-slide" src="{{ url_for('static', filename='images/hero6.png') }}" alt="House 6">
+  </div>
+
+  <div class="hero-overlay"></div>
+
+  <div class="hero-text">
+    <h2>Bayti</h2>
+    <h1>Spaces That Feel Like Home</h1>
+    <p>The trusted way to find fair property prices in Lebanon</p>
+
+    <form class="search-bar" action="{{ url_for('buy') }}" method="GET">
+      <input type="text" name="city" placeholder="Neighborhood or City">
+      <button type="button" class="clear-btn" id="clearBtn">✕</button>
+      <button class="search-btn" type="submit">
+        Search
+        <i class="fas fa-search"></i>
+      </button>
+    </form>
+  </div>
+</header>
+
+<section class="browse-categories">
+  <div class="browse-header">
+    <h2>Find your Next Home in Lebanon</h2>
+  </div>
+</section>
+
+<!-- Property type pills -->
+<section class="pill-section">
+  <a href="#" class="tab-btn">Apartments</a>
+  <a href="#" class="tab-btn">Villas</a>
+  <a href="#" class="tab-btn">Townhouses</a>
+  <a href="#" class="tab-btn">Offices</a>
+  <a href="#" class="tab-btn">Flexible Spaces</a>
+</section>
+<!-- Listings -->
+
+<section class="property-grid">
+
+  <a href="{{ url_for('property_details', property_id=21) }}" class="property-card">
+    <div class="property-image-wrap">
+      <img src="static/images/apartment.png" alt="Renovated office suite in Jounieh">
+      <span class="property-badge">For Sale</span>
+    </div>
+
+    <div class="property-overlay"></div>
+
+    <div class="property-content">
+      <h3 class="property-price">$210,000</h3>
+      <p class="property-location">Jounieh, Mount Lebanon</p>
+      <p class="property-features">2 BD &nbsp;|&nbsp; 1 BA &nbsp;|&nbsp; 131 m²</p>
+      <p class="property-title">Renovated office suite in Jounieh</p>
+    </div>
+  </a>
+
+  <a href="{{ url_for('property_details', property_id=33) }}" class="property-card">
+    <div class="property-image-wrap">
+      <img src="static/images/house.png" alt="Upscale villa residence in Saida Center">
+      <span class="property-badge">For Sale</span>
+    </div>
+
+    <div class="property-overlay"></div>
+
+    <div class="property-content">
+      <h3 class="property-price">$755,000</h3>
+      <p class="property-location">Nabatieh, South Lebanon</p>
+      <p class="property-features">6 BD &nbsp;|&nbsp; 3 BA &nbsp;|&nbsp; 592 m²</p>
+      <p class="property-title">Upscale villa residence in Saida Center</p>
+    </div>
+  </a>
+
+  <a href="{{ url_for('property_details', property_id=149) }}" class="property-card">
+    <div class="property-image-wrap">
+      <img src="static/images/jounieh.png" alt="Spacious family apartment near central Jounieh">
+      <span class="property-badge furnished">Furnished</span>
+    </div>
+
+    <div class="property-overlay"></div>
+
+    <div class="property-content">
+      <h3 class="property-price">$245,000</h3>
+      <p class="property-location">Jounieh, Mount Lebanon</p>
+      <p class="property-features">1 BD &nbsp;|&nbsp; 4 BA &nbsp;|&nbsp; 145 m²</p>
+      <p class="property-title">Spacious family apartment near central Jounieh</p>
+    </div>
+  </a>
+
+  <a href="{{ url_for('property_details', property_id=148) }}" class="property-card">
+    <div class="property-image-wrap">
+      <img src="static/images/villa.png" alt="Standalone villa in Antelias">
+      <span class="property-badge">For Rent</span>
+    </div>
+
+    <div class="property-overlay"></div>
+
+    <div class="property-content">
+      <h3 class="property-price">$4,500</h3>
+      <p class="property-location">Antelias, Mount Lebanon</p>
+      <p class="property-features">7 BD &nbsp;|&nbsp; 7 BA &nbsp;|&nbsp; 372 m²</p>
+      <p class="property-title">Standalone villa in Antelias</p>
+    </div>
+  </a>
+
+  <a href="{{ url_for('property_details', property_id=147) }}" class="property-card">
+    <div class="property-image-wrap">
+      <img src="static/images/office.png" alt="Renovated office suite in Saifi">
+      <span class="property-badge">For Rent</span>
+    </div>
+
+    <div class="property-overlay"></div>
+
+    <div class="property-content">
+      <h3 class="property-price">$2,650</h3>
+      <p class="property-location">Saifi, Beirut</p>
+      <p class="property-features">0 BD &nbsp;|&nbsp; 1 BA &nbsp;|&nbsp; 231 m²</p>
+      <p class="property-title">Renovated office suite in Saifi</p>
+    </div>
+  </a>
+
+  <a href="{{ url_for('property_details', property_id=145) }}" class="property-card">
+    <div class="property-image-wrap">
+      <img src="static/images/townhouse.png" alt="Townhouse in quiet Ksara">
+      <span class="property-badge">For Sale</span>
+    </div>
+
+    <div class="property-overlay"></div>
+
+    <div class="property-content">
+      <h3 class="property-price">$305,000</h3>
+      <p class="property-location">Ksara, Bekaa</p>
+      <p class="property-features">3 BD &nbsp;|&nbsp; 3 BA &nbsp;|&nbsp; 267 m²</p>
+      <p class="property-title">Townhouse in quiet Ksara</p>
+    </div>
+  </a>
+
+  <a href="{{ url_for('property_details', property_id=144) }}" class="property-card">
+    <div class="property-image-wrap">
+      <img src="static/images/townhouse2.png" alt="Townhouse in quiet Amioun">
+      <span class="property-badge">For Rent</span>
+    </div>
+
+    <div class="property-overlay"></div>
+
+    <div class="property-content">
+      <h3 class="property-price">$2,050</h3>
+      <p class="property-location">Amioun, North Lebanon</p>
+      <p class="property-features">3 BD &nbsp;|&nbsp; 4 BA &nbsp;|&nbsp; 344 m²</p>
+      <p class="property-title">Townhouse in quiet Amioun</p>
+    </div>
+  </a>
+
+  <a href="{{ url_for('property_details', property_id=143) }}" class="property-card">
+    <div class="property-image-wrap">
+      <img src="static/images/apartment2.png" alt="Bright apartment in Hamra">
+      <span class="property-badge furnished">Furnished</span>
+    </div>
+
+    <div class="property-overlay"></div>
+
+    <div class="property-content">
+      <h3 class="property-price">$3,000</h3>
+      <p class="property-location">Hamra, Beirut</p>
+      <p class="property-features">2 BD &nbsp;|&nbsp; 2 BA &nbsp;|&nbsp; 192 m²</p>
+      <p class="property-title">Bright apartment in Hamra</p>
+    </div>
+  </a>
+
+</section>
+
+<!-- Prevent price abuse -->
+<section class="section-spacing info-section">
+  <div class="w3-content">
+    <div class="section-center">
+      <h2 style="font-size: 32px; font-family: Poppins, sans-serif;">
+        How we prevent price abuse
+      </h2>
+      <p>We use advanced AI and real market data to ensure you never overpay for your home in Lebanon.</p>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon light-blue"><i class="fa-solid fa-chart-line"></i></div>
+        <h3>Compare prices</h3>
+        <p>Instantly compare any listing against recent sales and rental averages in the same building or neighborhood.</p>
+        <a href="{{ url_for('ai_assistant') }}">Compare with HomesyAI</a>
+      </div>
+
+      <div class="feature-card featured">
+        <div class="feature-icon white"><i class="fa-solid fa-robot"></i></div>
+        <h3>AI explains price</h3>
+        <p>Our ‘Bayti Insights’ AI breaks down why a home is priced the way it is based on floor level, finish quality, and local demand.</p>
+        <a href="{{ url_for('ai_assistant') }}">Learn about our AI assistant</a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon light-red"><i class="fa-solid fa-shield"></i></div>
+        <h3>Report abuse</h3>
+        <p>Spotted a fake listing or a price that’s significantly above market average? One-click reporting for a cleaner market.</p>
+        <a href="{{ url_for('report_abuse') }}">Submit report</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-spacing agents-section">
+  <div class="w3-content">
+    <div class="section-center">
+      <h2>Find a trusted agent</h2>
+        <p class="section-subtitle">
+    Connect with experienced professionals who understand your needs.
+  </p>
+    </div>
+
+    <div class="agents-row">
+      <div class="agent-card">
+        <img src="{{ url_for('static', filename='images/agents/agentt1.png') }}" alt="Lina Bazzi">
+        <h3>Lina Bazzi</h3>
+        <p class="agency">Summit Stone Realty</p>
+      </div>
+
+      <div class="agent-card">
+        <img src="{{ url_for('static', filename='images/agents/agentt2.png') }}" alt="Jad Khoury">
+        <h3>Jad Khoury</h3>
+        <p class="agency">Harbor & Hills</p>
+      </div>
+
+      <div class="agent-card">
+        <img src="{{ url_for('static', filename='images/agents/agentt3.png') }}" alt="Maya Salameh">
+        <h3>Maya Salameh</h3>
+        <p class="agency">Harbor & Hills</p>
+      </div>
+
+      <div class="agent-card">
+        <img src="{{ url_for('static', filename='images/agents/agentt4.png') }}" alt="Rana Younes">
+        <h3>Rana Younes</h3>
+        <p class="agency">Blue Coast Property</p>
+      </div>
+
+      <div class="agent-card">
+        <img src="{{ url_for('static', filename='images/agents/agentt5.png') }}" alt="Omar Chehab">
+        <h3>Omar Chehab</h3>
+        <p class="agency">Beirut Prime Properties</p>
+      </div>
+    </div>
+
+    <div class="agents-btn-wrap">
+      <a href="{{ url_for('find_agent') }}" class="discover-agents-btn">Discover more agents</a>
+    </div>
+  </div>
+</section>
+
+<section class="section-spacing bayti-ai-preview">
+  <div class="w3-content">
+    <div class="ai-preview-shell">
+
+      <div class="ai-preview-left">
+        <div class="ai-badge">HomesyAI</div>
+        <h2>Talk with our AI</h2>
+        <p class="ai-intro">
+          Meet <strong>HomesyAI</strong>, your smart home-finding assistant built for Lebanon.
+          It helps you discover properties faster, understand pricing, compare neighborhoods,
+          and get tailored recommendations based on your needs.
+        </p>
+
+        <div class="ai-feature-list">
+          <div class="ai-feature-chip">Personalized home recommendations</div>
+          <div class="ai-feature-chip">Price fairness guidance</div>
+          <div class="ai-feature-chip">Neighborhood insights</div>
+          <div class="ai-feature-chip">Natural language search</div>
+        </div>
+
+        <div class="ai-mini-points">
+          <div class="ai-mini-point">
+            <span class="dot"></span>
+            Ask in simple language, like you would text a real agent
+          </div>
+          <div class="ai-mini-point">
+            <span class="dot"></span>
+            Get listings based on budget, area, lifestyle, and preferences
+          </div>
+          <div class="ai-mini-point">
+            <span class="dot"></span>
+            Understand why a property may be fairly priced or overpriced
+          </div>
+        </div>
+
+        <a href="{{ url_for('ai_assistant') }}" class="ai-preview-btn">
+          Try HomesyAI
+        </a>
+      </div>
+
+      <div class="ai-preview-right">
+        <div class="chat-demo-card">
+          <div class="chat-demo-top">
+            <div class="chat-demo-title">Live AI preview</div>
+            <div class="chat-status">
+              <span class="status-dot"></span>
+              Online now
+            </div>
+          </div>
+
+          <div class="chat-message user-msg">
+            <div class="chat-label">You</div>
+            <p>
+              I’m looking for a modern 2-bedroom apartment in Beirut under $180,000,
+              preferably with parking and near cafés or restaurants.
+            </p>
+          </div>
+
+          <div class="chat-message ai-msg">
+            <div class="chat-label">Homesy</div>
+            <p>
+              Based on your budget and lifestyle, I’d suggest checking Achrafieh, Badaro,
+              and parts of Mar Mikhaël. You may find 2-bedroom apartments with parking in
+              quieter nearby streets. If you’d like, I can also show listings with the best
+              value per square meter and explain which areas are more likely to fit your budget.
+            </p>
+          </div>
+
+          <div class="chat-demo-footer">
+            <span>Smart search</span>
+            <span>Price help</span>
+            <span>Local guidance</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Local info -->
+<section class="section-spacing local-section">
+  <div class="w3-content local-grid">
+    <div class="local-text">
+      <h2>Get local info</h2>
+      <p>
+        Does it have a park nearby? How’s the traffic at 8 AM? Our neighborhood guides provide authentic local lifestyle data that you won’t find anywhere else.
+      </p>
+
+      <div class="local-tags">
+        <span class="local-pill green-pill">🌿 Walkability scores</span>
+        <span class="local-pill blue-pill">🍽 Dining heatmaps</span>
+      </div>
+    </div>
+
+    <div class="local-card">
+      <img src="{{ url_for('static', filename='images/localinfo.png') }}" alt="Life in Badaro">
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer-section">
+  <div class="w3-content footer-grid">
+    <div>
+      <h3>Bayti</h3>
+      <p>The modern standard for real estate in Lebanon. We bring transparency and trust to every home journey.</p>
+      <div class="footer-socials">
+        <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+        <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+      </div>
+    </div>
+
+    <div>
+      <h4>Discover</h4>
+      <a href="{{ url_for('buy') }}" class="bayti-link">Buy a Home</a>
+      <a href="{{ url_for('rent') }}" class="bayti-link">Rent a Home</a>
+      <a href="{{ url_for('sell') }}" class="bayti-link">Sell a Property</a>
+    </div>
+
+    <div>
+      <h4>Resources</h4>
+      <a href="{{ url_for('trust_certification') }}">Trust Certification</a>
+      <a href="{{ url_for('ai_insights_guide') }}">AI Insights Guide</a>
+      <a href="{{ url_for('report_abuse') }}">Report Abuse</a>
+    </div>
+
+    <div>
+      <h4>Company</h4>
+      <a href="{{ url_for('terms_of_service') }}">Terms of Service</a>
+      <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+      <a href="{{ url_for('cookies_settings') }}">Cookies Settings</a>
+      <a href="{{ url_for('contact_us') }}">Contact Us</a>
+    </div>
+  </div>
+
+  <div class="w3-content footer-bottom">
+    <p>© 2024 Bayti Real Estate Lebanon. All rights reserved.</p>
+    <span>DESIGNED FOR LEBANON</span>
+  </div>
+</footer>
+
+<script>
+  function toggleMobileMenu() {
+    var x = document.getElementById("mobileMenu");
+    if (x.className.indexOf("w3-show") === -1) {
+      x.className += " w3-show";
+    } else {
+      x.className = x.className.replace(" w3-show", "");
+    }
+  }
+</script>
+
+<script src="{{ url_for('static', filename='js/carousel.js') }}"></script>
+
+</body>
+</html>

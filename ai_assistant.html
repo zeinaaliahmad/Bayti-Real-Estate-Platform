@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bayti | AI Assistant</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ai_assistant.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="w3-top">
+  <div class="w3-bar bayti-navbar">
+
+    <div class="bayti-logo">
+      <a href="{{ url_for('home') }}" class="navbar-logo-link">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Bayti Logo" class="navbar-logo">
+      </a>
+    </div>
+
+    <div class="bayti-nav-center">
+      <a href="{{ url_for('buy') }}" class="bayti-link">Buy</a>
+      <a href="{{ url_for('rent') }}" class="bayti-link">Rent</a>
+      <a href="{{ url_for('sell') }}" class="bayti-link">Sell</a>
+      <a href="{{ url_for('find_agent') }}" class="bayti-link">Find an Agent</a>
+      <a href="{{ url_for('ai_assistant') }}" class="bayti-link">HomesyAI</a>
+    </div>
+
+    <div class="bayti-nav-right">
+      <a href="{{ url_for('favorites') }}" class="favorites-link">
+        <i class="fa-solid fa-heart"></i>
+      </a>
+
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard') }}" class="bayti-login">Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="bayti-signup">Logout</a>
+      {% else %}
+        <a href="{{ url_for('login') }}" class="bayti-login">Login</a>
+        <a href="{{ url_for('signup') }}" class="bayti-signup">Sign Up</a>
+      {% endif %}
+    </div>
+
+    <button type="button" class="bayti-menu-btn" id="mobileMenuBtn">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+
+  <div id="mobileMenu" class="bayti-mobile-menu">
+    <a href="{{ url_for('buy') }}">Buy</a>
+    <a href="{{ url_for('rent') }}">Rent</a>
+    <a href="{{ url_for('sell') }}">Sell or Rent my Property</a>
+    <a href="{{ url_for('find_agent') }}">Find an Agent</a>
+    <a href="{{ url_for('ai_assistant') }}">AI Assistant</a>
+    {% if current_user.is_authenticated %}
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Sign In</a>
+    {% endif %}
+  </div>
+</div>
+
+
+  <main class="assistant-page">
+    <section class="hero">
+      <h1>How can I help you find home?</h1>
+      <p>
+        Our AI analyzes your listings and answers naturally, so users can chat the way they already do.
+      </p>
+    </section>
+
+    <section class="chat-shell">
+      <div class="chat-scroll" id="chatScroll">
+
+        <div class="message-row bot-row">
+          <div class="avatar">✦</div>
+          <div class="message-stack">
+            <div class="bubble bot-bubble">
+              <p>Hello! I’m Homesy, your AI real estate assistant.</p>
+              <p>You can ask for rentals, homes for sale, comparisons, budget help, or even general questions.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="conversation"></div>
+      </div>
+
+      <div class="composer-panel">
+        <form id="chatForm" class="composer-form">
+          <div class="input-wrap">
+            <span class="input-icon">💬</span>
+            <input
+              id="messageInput"
+              type="text"
+              placeholder="Type a message..."
+              autocomplete="off"
+            />
+            <button class="send-btn" type="submit" aria-label="Send">➤</button>
+          </div>
+        </form>
+
+        <div class="try-row" id="suggestionRow">
+          <span class="try-label">TRY:</span>
+          <button type="button" class="chip">Apartment for rent in Hamra</button>
+          <button type="button" class="chip">2-bedroom in Achrafieh for sale</button>
+          <button type="button" class="chip">Explain the Lebanese rental market</button>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const chatForm = document.getElementById('chatForm');
+    const messageInput = document.getElementById('messageInput');
+    const conversation = document.getElementById('conversation');
+    const chatScroll = document.getElementById('chatScroll');
+    const suggestionRow = document.getElementById('suggestionRow');
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    function scrollToBottom() {
+      requestAnimationFrame(() => {
+        chatScroll.scrollTop = chatScroll.scrollHeight;
+      });
+    }
+    function appendUserMessage(text) {
+      const row = document.createElement('div');
+      row.className = 'message-row user-row';
+      row.innerHTML = `<div class="bubble user-bubble">${escapeHtml(text)}</div>`;
+      conversation.appendChild(row);
+      scrollToBottom();
+    }
+    function createCard(card) {
+      const badges = (card.badges || []).map(b => `<span class="listing-badge">${escapeHtml(b)}</span>`).join('');
+      const meta = (card.meta || []).map(item => `<span>${escapeHtml(item)}</span>`).join('');
+      return `
+      <article class="listing-card">
+        <div class="listing-top">
+          <div class="listing-badges">${badges}</div>
+        </div>
+        <div class="listing-body">
+          <div class="listing-price">${escapeHtml(card.price || '')}</div>
+          <h3>${escapeHtml(card.title || 'Property')}</h3>
+          <p class="listing-subtitle">${escapeHtml(card.subtitle || '')}</p>
+          <p class="listing-location">${escapeHtml(card.location || 'Lebanon')}</p>
+          <div class="listing-meta">${meta}</div>
+          <a class="listing-link" href="/property/${card.id}">View details</a>
+        </div>
+      </article>
+      `;
+    }
+    function appendBotResponse(payload) {
+    const row = document.createElement('div');
+    row.className = 'message-row bot-row';
+
+    let listingsHtml = '';
+    if (payload.listings && payload.listings.length) {
+      listingsHtml = `
+        <div class="response-grid">
+          <div class="listings-grid">
+            ${payload.listings.map(createCard).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+  row.innerHTML = `
+    <div class="avatar">✦</div>
+    <div class="message-stack">
+      <div class="bubble bot-bubble">${payload.reply_html || '<p>I’m here to help.</p>'}</div>
+      ${listingsHtml}
+    </div>
+  `;
+
+  conversation.appendChild(row);
+  renderSuggestions(payload.suggestions || []);
+  scrollToBottom();
+}
+
+function renderSuggestions(items) {
+  suggestionRow.innerHTML = '<span class="try-label">TRY:</span>';
+
+  items.forEach(item => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'chip';
+    btn.textContent = item;
+    btn.addEventListener('click', () => {
+      messageInput.value = item;
+      chatForm.requestSubmit();
+    });
+    suggestionRow.appendChild(btn);
+  });
+}
+
+async function sendMessage(text) {
+  appendUserMessage(text);
+  messageInput.value = '';
+  messageInput.focus();
+
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text })
+    });
+
+    const payload = await response.json();
+    appendBotResponse(payload);
+
+  } catch (error) {
+    appendBotResponse({
+      reply_html: '<p>Something went wrong while contacting the assistant. Please try again.</p>',
+      listings: [],
+      suggestions: []
+    });
+  }
+}
+
+chatForm.addEventListener('submit', function(event) {
+  event.preventDefault();
+
+  const text = messageInput.value.trim();
+  if (!text) return;
+
+  sendMessage(text);
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const menuBtn = document.getElementById("mobileMenuBtn");
+  const mobileMenu = document.getElementById("mobileMenu");
+
+  if (menuBtn && mobileMenu) {
+    menuBtn.addEventListener("click", function () {
+      mobileMenu.classList.toggle("open");
+    });
+  }
+});
+</script>
+</body>
+</html>

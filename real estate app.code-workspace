@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "../__pycache__"
+		},
+		{
+			"path": "../controllers"
+		},
+		{
+			"path": "../static"
+		},
+		{
+			"path": "."
+		}
+	]
+}

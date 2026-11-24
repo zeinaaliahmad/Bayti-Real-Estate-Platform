@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ property.title }} - Bayti</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/property-details.css') }}">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""
+  >
+</head>
+<body>
+
+  <div class="w3-top">
+    <div class="w3-bar bayti-navbar">
+      <div class="bayti-logo">
+        <a href="{{ url_for('home') }}" class="navbar-logo-link">
+          <img
+            src="{{ url_for('static', filename='images/logo.png') }}"
+            alt="Bayti Logo"
+            class="navbar-logo"
+            onerror="this.style.display='none';"
+          >
+        </a>
+      </div>
+
+      <div class="bayti-nav-center">
+        <a href="{{ url_for('buy') }}" class="bayti-link">Buy</a>
+        <a href="{{ url_for('rent') }}" class="bayti-link">Rent</a>
+        <a href="{{ url_for('sell') }}" class="bayti-link">Sell</a>
+        <a href="{{ url_for('find_agent') }}" class="bayti-link">Find an Agent</a>
+        <a href="{{ url_for('ai_assistant') }}" class="bayti-link">HomesyAI</a>
+      </div>
+
+      <div class="bayti-nav-right">
+        <a href="{{ url_for('favorites') }}" class="favorites-link">
+          <i class="fa-solid fa-heart"></i>
+        </a>
+
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('dashboard') }}" class="bayti-login">Dashboard</a>
+          <a href="{{ url_for('logout') }}" class="bayti-signup">Logout</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="bayti-login">Login</a>
+          <a href="{{ url_for('signup') }}" class="bayti-signup">Sign Up</a>
+        {% endif %}
+      </div>
+
+      <a href="javascript:void(0)" class="bayti-menu-btn" onclick="toggleMobileMenu()">
+        <i class="fa-solid fa-bars"></i>
+      </a>
+    </div>
+
+    <div id="mobileMenu" class="w3-bar-block bayti-mobile-menu w3-hide">
+      <a href="{{ url_for('buy') }}" class="w3-bar-item w3-button">Buy</a>
+      <a href="{{ url_for('rent') }}" class="w3-bar-item w3-button">Rent</a>
+      <a href="{{ url_for('sell') }}" class="w3-bar-item w3-button">Sell or Rent my Property</a>
+      <a href="{{ url_for('find_agent') }}" class="w3-bar-item w3-button">Find an Agent</a>
+      <a href="{{ url_for('ai_assistant') }}" class="w3-bar-item w3-button">AI Assistant</a>
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard') }}" class="w3-bar-item w3-button bayti-mobile-signin">Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="w3-bar-item w3-button bayti-mobile-signin">Logout</a>
+      {% else %}
+        <a href="{{ url_for('login') }}" class="w3-bar-item w3-button bayti-mobile-signin">Sign In</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <main class="details-page">
+    <div class="w3-content page-wrap">
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-wrap">
+            {% for category, message in messages %}
+              <div class="flash-msg {% if category == 'success' %}flash-success{% else %}flash-error{% endif %}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <div class="page-title-row">
+        <div class="title-left">
+          <h1>{{ property.title }}</h1>
+          <div class="page-sub-meta">
+            <span><i class="fa-solid fa-location-dot"></i> {{ property.neighborhood or property.district or property.city }}, {{ property.city }}</span>
+            {% if property.listing_type %}
+              <span><i class="fa-solid fa-tag"></i> {{ property.listing_type|capitalize }}</span>
+            {% endif %}
+            {% if property.property_type %}
+              <span><i class="fa-solid fa-house"></i> {{ property.property_type|capitalize }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if current_user.is_authenticated %}
+          {% if property.id in favorite_ids %}
+            <form method="POST" action="{{ url_for('remove_favorite', favorite_id=favorite_map[property.id]) }}" class="favorite-inline-form">
+              <input type="hidden" name="next" value="{{ request.path }}">
+              <button class="ghost-side-btn saved top-save-btn" type="submit">
+                <i class="fa-solid fa-heart"></i> Saved
+              </button>
+            </form>
+          {% else %}
+            <form method="POST" action="{{ url_for('add_favorite', property_id=property.id) }}" class="favorite-inline-form">
+              <input type="hidden" name="next" value="{{ request.path }}">
+              <button class="ghost-side-btn top-save-btn" type="submit">
+                <i class="fa-regular fa-heart"></i> Save Listing
+              </button>
+            </form>
+          {% endif %}
+        {% else %}
+          <a href="{{ url_for('login', next=request.path) }}" class="ghost-side-btn top-save-btn">
+            <i class="fa-regular fa-heart"></i> Save Listing
+          </a>
+        {% endif %}
+      </div>
+
+      <section class="top-layout">
+
+        <div class="gallery-area">
+          <div class="gallery-grid">
+            <div class="main-photo-wrap">
+              <img
+                src="{{ url_for('static', filename='images/properties/' ~ property.property_type|lower|replace(' ', '_') ~ '_1.jpg') }}"
+                alt="{{ property.title }}"
+                onerror="this.src='{{ url_for('static', filename='images/placeholder-property.jpg') }}';"
+              >
+              <div class="gallery-actions">
+                <button class="gallery-btn" type="button" onclick="openGalleryModal()">
+                  <i class="fa-solid fa-camera"></i>
+                  View Photos
+                </button>
+              </div>
+            </div>
+
+            <div class="side-photos">
+              <div class="small-photo">
+                <img
+                  src="{{ url_for('static', filename='images/properties/' ~ property.property_type|lower|replace(' ', '_') ~ '_2.jpg') }}"
+                  alt="{{ property.title }} interior"
+                  onerror="this.src='{{ url_for('static', filename='images/placeholder-property.jpg') }}';"
+                >
+              </div>
+
+              <div class="small-photo more-photo" onclick="openGalleryModal()">
+                <img
+                  src="{{ url_for('static', filename='images/properties/' ~ property.property_type|lower|replace(' ', '_') ~ '_3.jpg') }}"
+                  alt="{{ property.title }} bedroom"
+                  onerror="this.src='{{ url_for('static', filename='images/placeholder-property.jpg') }}';"
+                >
+                <div class="more-overlay">View More</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="specs-row">
+            {% if property.bedrooms is not none %}
+              <div class="spec-item">{{ property.bedrooms }} Beds</div>
+            {% endif %}
+            {% if property.bathrooms is not none %}
+              <div class="spec-item">{{ property.bathrooms }} Baths</div>
+            {% endif %}
+            {% if property.area_sqm %}
+              <div class="spec-item">{{ property.area_sqm }} m²</div>
+            {% endif %}
+            {% if property.floor_number %}
+              <div class="spec-item">{{ property.floor_number }} Floor</div>
+            {% endif %}
+            <div class="spec-item">{{ property.parking_spaces or 0 }} Parking</div>
+            {% if property.condition %}
+              <div class="spec-item green-text">{{ property.condition }}</div>
+            {% endif %}
+          </div>
+
+          <section class="why-price-card">
+            <div class="why-price-header">
+              <h2><i class="fa-solid fa-chart-column"></i> Why this price?</h2>
+                <div class="insight-price">${{ "{:,.0f}".format(property.price_usd or 0) }}
+                  {% if property.listing_type == "Rent" %}
+                  <span>
+                    {% if property.duration == "daily" %}
+                      /day
+                    {% else %}
+                      /month
+                    {% endif %}
+                  </span>
+                  {% endif %}
+                </div>
+              <a href="{{ url_for('report_abuse', property_id=property.id) }}">⚑ Report Price Abuse</a>
+            </div>
+
+            <div class="why-price-grid">
+              <div class="market-box">
+                <span class="mini-title">Market Position</span>
+
+                <h3>
+                  {% if computed_market_position == 'undervalued' %}
+                    Below Market
+                  {% elif computed_market_position == 'fair' %}
+                    Within Market Range
+                  {% elif computed_market_position == 'overpriced' %}
+                    Above Market Range
+                  {% else %}
+                    Within Market Range
+                  {% endif %}
+                </h3>
+
+                <div class="range-bar">
+                  <span class="bar low"></span>
+                  <span class="bar fair"></span>
+                  <span class="bar high"></span>
+                </div>
+
+                <div class="range-labels">
+                  <span>UNDERVALUED</span>
+                  <span>FAIR</span>
+                  <span>OVERPRICED</span>
+                </div>
+
+                <p>{{ computed_pricing_reason }}</p>
+
+                {% if current_ppsqm and avg_ppsqm %}
+                  <div class="price-metrics">
+                    <span>This home: ${{ "{:,.0f}".format(current_ppsqm) }}/sqm</span>
+                    <span>Area average: ${{ "{:,.0f}".format(avg_ppsqm) }}/sqm</span>
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="history-box">
+                <span class="mini-title">Price History</span>
+
+                <div class="history-chart">
+                  {% if price_history %}
+                    {% for value in price_history %}
+                      <div class="chart-col-wrapper">
+                        <div class="chart-col" style="height: {{ (value / (price_history|max)) * 160 }}px;"></div>
+                        <span class="chart-value">${{ "{:,.0f}".format(value) }}</span>
+                      </div>
+                    {% endfor %}
+                  {% else %}
+                    <div class="history-empty">No price history available</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="essentials-section">
+            <h2>Lebanon Living Essentials</h2>
+
+            <div class="essentials-grid">
+              <div class="essential-card">
+                <h3><i class="fa-solid fa-bolt"></i> Power & Utilities</h3>
+                <div class="essential-list">
+                  <div class="info-row"><span>State Electricity:</span><strong>{{ property.state_electricity or 'N/A' }}</strong></div>
+                  <div class="info-row"><span>Generator Cap:</span><strong>{{ property.generator_cap or 'N/A' }}</strong></div>
+                  <div class="info-row"><span>Solar Ready:</span><strong>{{ property.solar_ready or 'N/A' }}</strong></div>
+                </div>
+              </div>
+
+              <div class="essential-card">
+                <h3><i class="fa-solid fa-droplet"></i> Water Schedule</h3>
+                <div class="essential-list">
+                  <div class="info-row"><span>City Water:</span><strong>{{ property.city_water or 'N/A' }}</strong></div>
+                  <div class="info-row"><span>Tank Capacity:</span><strong>{{ property.tank_capacity or 'N/A' }}</strong></div>
+                  <div class="info-row"><span>Filtration:</span><strong>{{ property.filtration or 'N/A' }}</strong></div>
+                </div>
+              </div>
+
+              <div class="essential-card">
+                <h3><i class="fa-solid fa-building"></i> Daily Commute</h3>
+                <div class="essential-list">
+                  <div class="info-row"><span>Downtown:</span><strong>{{ property.downtown_distance or 'N/A' }}</strong></div>
+                  <div class="info-row"><span>Traffic Level:</span><strong class="orange-text">{{ property.traffic_level or 'N/A' }}</strong></div>
+                  <div class="info-row"><span>Quiet Hours:</span><strong>{{ property.quiet_hours or 'N/A' }}</strong></div>
+                </div>
+              </div>
+            </div>
+
+            {% if nearby_places %}
+              <div class="nearby-row">
+                {% for place in nearby_places %}
+                  <div class="nearby-pill">
+                    <i class="fa-solid fa-location-dot"></i> {{ place }}
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </section>
+
+          <section class="overview-section">
+            <h2>Property Overview</h2>
+            <p>{{ property.description }}</p>
+          </section>
+
+          <section id="contact-agent-box" class="contact-agent-box">
+            <h2>Contact {{ agent.full_name if agent else 'Agent' }}</h2>
+
+            <form method="POST" action="{{ url_for('contact_agent', property_id=property.id) }}" class="contact-agent-form">
+              <input
+                type="text"
+                name="full_name"
+                placeholder="Your full name"
+                value="{{ current_user.full_name if current_user.is_authenticated and current_user.full_name else '' }}"
+                required
+              >
+
+              <input
+                type="email"
+                name="email"
+                placeholder="Your email"
+                value="{{ current_user.email if current_user.is_authenticated else '' }}"
+                required
+              >
+
+              <input
+                type="text"
+                name="phone"
+                placeholder="Your phone number"
+              >
+
+              <textarea name="message" rows="5" required>Hello, I’m interested in {{ property.title }}.</textarea>
+
+              <button type="submit" class="primary-side-btn">Send Message</button>
+            </form>
+          </section>
+        </div>
+
+        <aside class="sidebar-area">
+          <div class="agent-booking-card">
+            <div class="agent-row">
+              {% if agent and agent.photo_url %}
+                <img
+                  src="{{ agent.photo_url }}"
+                  alt="{{ agent.full_name }}"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                >
+                <div class="agent-avatar-fallback" style="display:none;">
+                  <i class="fa-solid fa-user"></i>
+                </div>
+              {% else %}
+                <div class="agent-avatar-fallback">
+                  <i class="fa-solid fa-user"></i>
+                </div>
+              {% endif %}
+
+              <div class="agent-info">
+                <h3>{{ agent.full_name if agent else 'Agent Name' }}</h3>
+                <p>{{ agent.agency_name if agent and agent.agency_name else 'Bayti Partner Agent' }}</p>
+              </div>
+
+              {% if agent and agent.rating %}
+                <span class="rating">{{ agent.rating }}/5</span>
+              {% endif %}
+            </div>
+
+            <a href="#contact-agent-box" class="secondary-side-btn">
+              <i class="fa-solid fa-envelope"></i> Contact Agent
+            </a>
+
+            {% if current_user.is_authenticated %}
+              {% if property.id in favorite_ids %}
+                <form method="POST" action="{{ url_for('remove_favorite', favorite_id=favorite_map[property.id]) }}" class="favorite-side-form">
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button class="ghost-side-btn saved" type="submit">
+                    <i class="fa-solid fa-heart"></i> Saved
+                  </button>
+                </form>
+              {% else %}
+                <form method="POST" action="{{ url_for('add_favorite', property_id=property.id) }}" class="favorite-side-form">
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button class="ghost-side-btn" type="submit">
+                    <i class="fa-regular fa-heart"></i> Save Listing
+                  </button>
+                </form>
+              {% endif %}
+            {% else %}
+              <a href="{{ url_for('login', next=request.path) }}" class="ghost-side-btn">
+                <i class="fa-regular fa-heart"></i> Save Listing
+              </a>
+            {% endif %}
+
+            <div class="property-id">Property ID: {{ property.slug or ('BY-' ~ property.id) }}</div>
+            <a href="#" class="share-link">Share this property</a>
+          </div>
+
+          <div class="score-map-card">
+            {% if property.latitude and property.longitude %}
+              <div id="property-map"></div>
+            {% else %}
+              <div class="map-unavailable">Location not available for this listing.</div>
+            {% endif %}
+          </div>
+        </aside>
+      </section>
+
+      <section class="similar-section">
+        <h2>Homes Similar to This</h2>
+
+        <div class="similar-grid">
+          {% for sim in similar_properties %}
+            <a href="{{ url_for('property_details', property_id=sim.id) }}" class="similar-card-link">
+              <div class="similar-card">
+                <div class="similar-image-wrap">
+                  <img
+                    src="{{ url_for('static', filename='images/properties/' ~ sim.property_type|lower|replace(' ', '_') ~ '_1.jpg') }}"
+                    alt="{{ sim.title }}"
+                    onerror="this.src='{{ url_for('static', filename='images/placeholder-property.jpg') }}';"
+                  >
+                </div>
+
+                <div class="similar-content">
+                  <h3>${{ "{:,.0f}".format(sim.price_usd) }}</h3>
+                  <h4>{{ sim.title }}</h4>
+                  <p>{{ sim.district or sim.city }}, {{ sim.city }} • {{ sim.bedrooms }} Beds • {{ sim.area_sqm }} m²</p>
+                </div>
+              </div>
+            </a>
+          {% else %}
+            <p>No similar homes found yet.</p>
+          {% endfor %}
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+<footer class="footer-section">
+  <div class="w3-content footer-grid">
+    <div>
+      <h3>Bayti</h3>
+      <p>The modern standard for real estate in Lebanon. We bring transparency and trust to every home journey.</p>
+      <div class="footer-socials">
+        <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+        <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+      </div>
+    </div>
+
+    <div>
+      <h4>Discover</h4>
+      <a href="{{ url_for('buy') }}" class="bayti-link">Buy a Home</a>
+      <a href="{{ url_for('rent') }}" class="bayti-link">Rent a Home</a>
+      <a href="{{ url_for('sell') }}" class="bayti-link">Sell a Property</a>
+    </div>
+
+    <div>
+      <h4>Resources</h4>
+      <a href="{{ url_for('trust_certification') }}">Trust Certification</a>
+      <a href="{{ url_for('ai_insights_guide') }}">AI Insights Guide</a>
+      <a href="{{ url_for('report_abuse') }}">Report Abuse</a>
+    </div>
+
+    <div>
+      <h4>Company</h4>
+      <a href="{{ url_for('terms_of_service') }}">Terms of Service</a>
+      <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+      <a href="{{ url_for('cookies_settings') }}">Cookies Settings</a>
+      <a href="{{ url_for('contact_us') }}">Contact Us</a>
+    </div>
+  </div>
+
+  <div class="w3-content footer-bottom">
+    <p>© 2024 Bayti Real Estate Lebanon. All rights reserved.</p>
+    <span>DESIGNED FOR LEBANON</span>
+  </div>
+</footer>
+
+  <div id="galleryModal" class="gallery-modal" aria-hidden="true">
+    <div class="gallery-modal-content">
+      <button class="gallery-modal-close" type="button" onclick="closeGalleryModal()" aria-label="Close gallery">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <h2>{{ property.title }} Gallery</h2>
+
+      <div class="gallery-modal-grid">
+        <img
+          src="{{ url_for('static', filename='images/properties/' ~ property.property_type|lower|replace(' ', '_') ~ '_1.jpg') }}"
+          alt="{{ property.title }}"
+          onerror="this.src='{{ url_for('static', filename='images/placeholder-property.jpg') }}';"
+        >
+        <img
+          src="{{ url_for('static', filename='images/properties/' ~ property.property_type|lower|replace(' ', '_') ~ '_2.jpg') }}"
+          alt="{{ property.title }} interior"
+          onerror="this.src='{{ url_for('static', filename='images/placeholder-property.jpg') }}';"
+        >
+        <img
+          src="{{ url_for('static', filename='images/properties/' ~ property.property_type|lower|replace(' ', '_') ~ '_3.jpg') }}"
+          alt="{{ property.title }} bedroom"
+          onerror="this.src='{{ url_for('static', filename='images/placeholder-property.jpg') }}';"
+        >
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <script>
+    function toggleMobileMenu() {
+      var x = document.getElementById("mobileMenu");
+      if (x.className.indexOf("w3-show") === -1) {
+        x.className += " w3-show";
+      } else {
+        x.className = x.className.replace(" w3-show", "");
+      }
+    }
+
+    function openGalleryModal() {
+      const modal = document.getElementById("galleryModal");
+      if (!modal) return;
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeGalleryModal() {
+      const modal = document.getElementById("galleryModal");
+      if (!modal) return;
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "auto";
+    }
+
+    window.addEventListener("click", function (e) {
+      const modal = document.getElementById("galleryModal");
+      if (e.target === modal) {
+        closeGalleryModal();
+      }
+    });
+
+    window.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        closeGalleryModal();
+      }
+    });
+
+    {% if property.latitude and property.longitude %}
+      document.addEventListener("DOMContentLoaded", function () {
+        const mapContainer = document.getElementById("property-map");
+        if (!mapContainer) return;
+
+        const map = L.map("property-map").setView([{{ property.latitude }}, {{ property.longitude }}], 14);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "&copy; OpenStreetMap contributors"
+        }).addTo(map);
+
+        L.marker([{{ property.latitude }}, {{ property.longitude }}])
+          .addTo(map)
+          .bindPopup(`{{ property.title|escape }}`)
+          .openPopup();
+
+        setTimeout(function () {
+          map.invalidateSize();
+        }, 200);
+      });
+    {% endif %}
+  </script>
+
+</body>
+</html>

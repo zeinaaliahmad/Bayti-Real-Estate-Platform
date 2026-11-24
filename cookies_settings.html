@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cookies Settings | Bayti</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/footer_pages.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body class="footer-page-body">
+
+  <section class="footer-page-hero">
+    <div class="footer-page-hero-content">
+      <h1>Cookies Settings</h1>
+      <p>Simple controls that help you understand and manage the technologies Bayti uses for security, analytics, and a smoother browsing experience.</p>
+    </div>
+  </section>
+
+  <main class="footer-page-wrap">
+    <div class="footer-page-card">
+      <span class="footer-page-meta">Control your browsing preferences</span>
+
+      <p class="footer-page-intro">
+        Cookies help Bayti remember your preferences, improve security, and understand how the platform is used. Below is a design-ready version of the settings page. Later, you can connect these controls to real functionality.
+      </p>
+
+      <div class="footer-cookie-options">
+        <div class="footer-cookie-option">
+          <div>
+            <h3>Strictly Necessary Cookies</h3>
+            <p>Required for login, core navigation, security, and essential page functionality.</p>
+          </div>
+          <div class="fake-toggle active"></div>
+        </div>
+
+        <div class="footer-cookie-option">
+          <div>
+            <h3>Performance Cookies</h3>
+            <p>Help us understand how visitors use Bayti so we can improve speed, usability, and overall experience.</p>
+          </div>
+          <div class="fake-toggle active"></div>
+        </div>
+
+        <div class="footer-cookie-option">
+          <div>
+            <h3>Functional Cookies</h3>
+            <p>Remember settings such as preferred language, saved interface choices, and user convenience options.</p>
+          </div>
+          <div class="fake-toggle"></div>
+        </div>
+
+        <div class="footer-cookie-option">
+          <div>
+            <h3>Personalization Cookies</h3>
+            <p>Support tailored recommendations and more relevant content across the platform.</p>
+          </div>
+          <div class="fake-toggle"></div>
+        </div>
+      </div>
+
+      <div class="footer-page-section">
+        <h2>Important note</h2>
+        <p>
+          This page can be used now as a polished informational screen. If you want, the next step is to make the toggles actually save preferences with JavaScript and Flask.
+        </p>
+      </div>
+
+      <div class="footer-action-row">
+        <a href="#" class="footer-page-btn">Save Preferences</a>
+        <a href="#" class="footer-page-btn secondary">Allow Essential Only</a>
+      </div>
+    </div>
+  </main>
+
+</body>
+</html>

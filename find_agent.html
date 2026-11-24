@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bayti - Find an Agent</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/find-agent.css') }}">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div class="w3-top">
+    <div class="w3-bar bayti-navbar">
+
+      <div class="bayti-logo">
+        <a href="{{ url_for('home') }}" class="navbar-logo-link">
+          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Bayti Logo" class="navbar-logo">
+        </a>
+      </div>
+
+      <div class="bayti-nav-center">
+        <a href="{{ url_for('buy') }}" class="bayti-link">Buy</a>
+        <a href="{{ url_for('rent') }}" class="bayti-link">Rent</a>
+        <a href="{{ url_for('sell') }}" class="bayti-link">Sell</a>
+        <a href="{{ url_for('find_agent') }}" class="bayti-link active">Find an Agent</a>
+        <a href="{{ url_for('ai_assistant') }}" class="bayti-link">HomesyAI</a>
+      </div>
+
+      <div class="bayti-nav-right">
+        <a href="{{ url_for('favorites') }}" class="favorites-link">
+          <i class="fa-solid fa-heart"></i>
+        </a>
+
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('dashboard') }}" class="bayti-login">Dashboard</a>
+          <a href="{{ url_for('logout') }}" class="bayti-signup">Logout</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="bayti-login">Login</a>
+          <a href="{{ url_for('signup') }}" class="bayti-signup">Sign Up</a>
+        {% endif %}
+      </div>
+
+      <a href="javascript:void(0)" class="bayti-menu-btn" onclick="toggleMobileMenu()">
+        <i class="fa-solid fa-bars"></i>
+      </a>
+    </div>
+
+    <div id="mobileMenu" class="w3-bar-block bayti-mobile-menu w3-hide">
+      <a href="{{ url_for('buy') }}" class="w3-bar-item w3-button">Buy</a>
+      <a href="{{ url_for('rent') }}" class="w3-bar-item w3-button">Rent</a>
+      <a href="{{ url_for('sell') }}" class="w3-bar-item w3-button">Sell or Rent my Property</a>
+      <a href="{{ url_for('find_agent') }}" class="w3-bar-item w3-button">Find an Agent</a>
+      <a href="{{ url_for('ai_assistant') }}" class="w3-bar-item w3-button">AI Assistant</a>
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard') }}" class="w3-bar-item w3-button bayti-mobile-signin">Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="w3-bar-item w3-button bayti-mobile-signin">Logout</a>
+      {% else %}
+        <a href="{{ url_for('login') }}" class="w3-bar-item w3-button bayti-mobile-signin">Sign In</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section class="agent-hero">
+    <div class="w3-content hero-wrap">
+      <div class="hero-grid">
+        <div class="hero-text">
+          <span class="hero-badge"><i class="fa-solid fa-circle"></i> EXPERT ADVISORY</span>
+          <h1>The Right Guide for Your <span>Next Home.</span></h1>
+          <p>
+            Connect with Lebanon’s most trusted real estate professionals.
+            Our agents are verified for market knowledge, ethical standards,
+            and high performance.
+          </p>
+        </div>
+
+        <div class="hero-visual">
+          <div class="hero-portrait-card">
+            <img src="{{ url_for('static', filename='images/agents/agent-hero.png') }}" alt="Featured agent portrait">
+          </div>
+
+          <div class="stats-float-card">
+            <div class="stacked-avatars">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="stats-copy">
+              <strong>500+</strong>
+              <span>Verified Local Experts</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEARCH FORM -->
+      <form method="GET" action="{{ url_for('find_agent') }}" class="agent-search-bar w3-card">
+        <div class="agent-search-grid">
+
+          <div class="search-select-box">
+            <i class="fa-solid fa-location-dot"></i>
+            <select name="location">
+              <option value="">City</option>
+              <option value="Beirut" {% if selected_location == "Beirut" %}selected{% endif %}>Beirut</option>
+              <option value="Jounieh" {% if selected_location == "Jounieh" %}selected{% endif %}>Jounieh</option>
+              <option value="Tripoli" {% if selected_location == "Tripoli" %}selected{% endif %}>Tripoli</option>
+              <option value="Saida" {% if selected_location == "Saida" %}selected{% endif %}>Saida</option>
+              <option value="Zahle" {% if selected_location == "Zahle" %}selected{% endif %}>Zahle</option>
+              <option value="Nabatieh" {% if selected_location == "Nabatieh" %}selected{% endif %}>Nabatieh</option>
+            </select>
+          </div>
+
+          <div class="search-select-box">
+            <i class="fa-solid fa-house"></i>
+            <select name="service">
+              <option value="">Buy / Sell / Rent</option>
+              <option value="buy" {% if selected_service == "buy" %}selected{% endif %}>Buy</option>
+              <option value="sell" {% if selected_service == "sell" %}selected{% endif %}>Sell</option>
+              <option value="rent" {% if selected_service == "rent" %}selected{% endif %}>Rent</option>
+            </select>
+          </div>
+
+          <div class="search-select-box">
+            <i class="fa-solid fa-language"></i>
+            <select name="language">
+              <option value="">Language</option>
+              <option value="Arabic" {% if selected_language == "Arabic" %}selected{% endif %}>Arabic</option>
+              <option value="English" {% if selected_language == "English" %}selected{% endif %}>English</option>
+              <option value="French" {% if selected_language == "French" %}selected{% endif %}>French</option>
+            </select>
+          </div>
+
+          <label class="verified-check">
+            <input
+              type="checkbox"
+              name="verified_only"
+              value="1"
+              {% if selected_verified == "1" %}checked{% endif %}
+            >
+            <span>Verified Only</span>
+          </label>
+
+          <button type="submit" class="search-agent-btn">Search Agents</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- RESULTS SECTION -->
+  <section class="top-agents-section">
+    <div class="w3-content">
+      <div class="section-head">
+        <div>
+          <h2>Find Your Agent</h2>
+          <p>
+            {% if agents and agents|length > 0 %}
+              {{ agents|length }} agent{% if agents|length != 1 %}s{% endif %} found based on your search.
+            {% else %}
+              Browse trusted professionals across Lebanon.
+            {% endif %}
+          </p>
+        </div>
+
+        {% if request.args %}
+        <div class="clear-filters-wrap">
+          <a href="{{ url_for('find_agent') }}" class="clear-filters-btn">Clear Filters</a>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="agents-grid">
+        {% if agents and agents|length > 0 %}
+          {% for agent in agents %}
+          <div class="agent-card">
+            <div class="agent-card-image">
+              <img src="{{ get_agent_image(agent) }}" alt="{{ agent.full_name }}">
+
+              {% if agent.is_verified %}
+                <span class="agent-chip green-chip">VERIFIED AGENT</span>
+              {% else %}
+                <span class="agent-chip">LOCAL EXPERT</span>
+              {% endif %}
+            </div>
+
+            <div class="agent-card-body">
+              <div class="agent-name-row">
+                <div>
+                  <h3>{{ agent.full_name }}</h3>
+                  <p>{{ agent.agency_name }}</p>
+                </div>
+                <span class="rating-chip">★ {{ agent.rating }}</span>
+              </div>
+
+              <div class="agent-meta">
+                <p>
+                  <i class="fa-solid fa-location-dot"></i>
+                  {{ agent.city }}{% if agent.district %}, {{ agent.district }}{% endif %}
+                </p>
+
+                <p>
+                  <i class="fa-solid fa-globe"></i>
+                  {{ agent.languages }}
+                </p>
+
+                <p>
+                  <i class="fa-solid fa-briefcase"></i>
+                  {{ agent.services|replace(',', ', ') }}
+                </p>
+
+                <p>
+                  <i class="fa-solid fa-chart-line"></i>
+                  {{ agent.years_experience }} years experience
+                </p>
+
+                <p class="response-time">
+                  <i class="fa-solid fa-circle"></i>
+                  {{ agent.total_listings }} active listing{% if agent.total_listings != 1 %}s{% endif %}
+                </p>
+              </div>
+
+              <div class="agent-card-actions">
+                <a href="tel:{{ agent.phone }}" class="connect-btn secondary-btn">
+                  <i class="fa-solid fa-phone"></i> Call
+                </a>
+
+                <a href="https://wa.me/{{ agent.whatsapp }}" target="_blank" class="connect-btn secondary-btn">
+                  <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                </a>
+
+                <a href="mailto:{{ agent.email }}" class="connect-btn secondary-btn">
+                  <i class="fa-solid fa-envelope"></i> Email
+                </a>
+              </div>
+
+              <button
+                type="button"
+                class="connect-btn main-connect-btn open-agent-modal"
+                data-agent-name="{{ agent.full_name }}"
+                data-agent-agency="{{ agent.agency_name }}"
+              >
+                Send a Message <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="no-agents-found">
+            <div class="no-agents-icon">
+              <i class="fa-solid fa-user-group"></i>
+            </div>
+            <h3>No agents found</h3>
+            <p>Try changing the location, service, language, or verified filter.</p>
+            <a href="{{ url_for('find_agent') }}" class="search-agent-btn no-results-btn">Reset Search</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Top rated section -->
+  <section class="top-agents-section featured-agents-section">
+    <div class="w3-content">
+      <div class="section-head">
+        <div>
+          <h2>Top-Rated Professionals</h2>
+          <p>Discover agents with proven track records in your desired neighborhood.</p>
+        </div>
+      </div>
+
+      <div class="agents-grid">
+        {% for agent in top_agents %}
+        <div class="agent-card">
+          <div class="agent-card-image">
+            <img
+              src="{{ agent.photo_url if agent.photo_url else url_for('static', filename='images/agents/default-agent.jpg') }}"
+              alt="{{ agent.full_name }}"
+            >
+
+            {% if agent.is_verified %}
+              <span class="agent-chip green-chip">VERIFIED AGENT</span>
+            {% else %}
+              <span class="agent-chip">LOCAL EXPERT</span>
+            {% endif %}
+          </div>
+
+          <div class="agent-card-body">
+            <div class="agent-name-row">
+              <div>
+                <h3>{{ agent.full_name }}</h3>
+                <p>{{ agent.agency_name }}</p>
+              </div>
+              <span class="rating-chip">★ {{ agent.rating }}</span>
+            </div>
+
+            <div class="agent-meta">
+              <p>
+                <i class="fa-solid fa-location-dot"></i>
+                {{ agent.city }}{% if agent.district %}, {{ agent.district }}{% endif %}
+              </p>
+
+              <p>
+                <i class="fa-solid fa-globe"></i>
+                {{ agent.languages }}
+              </p>
+
+              <p>
+                <i class="fa-solid fa-briefcase"></i>
+                {{ agent.services|replace(',', ', ') }}
+              </p>
+
+              <p class="response-time">
+                <i class="fa-solid fa-circle"></i>
+                {{ agent.total_listings }} active listing{% if agent.total_listings != 1 %}s{% endif %}
+              </p>
+            </div>
+
+            <div class="agent-card-actions">
+              <a href="tel:{{ agent.phone }}" class="connect-btn secondary-btn">
+                <i class="fa-solid fa-phone"></i> Call
+              </a>
+
+              <a href="https://wa.me/{{ agent.whatsapp }}" target="_blank" class="connect-btn secondary-btn">
+                <i class="fa-brands fa-whatsapp"></i> WhatsApp
+              </a>
+
+              <a href="mailto:{{ agent.email }}" class="connect-btn secondary-btn">
+                <i class="fa-solid fa-envelope"></i> Email
+              </a>
+            </div>
+
+            <button
+              type="button"
+              class="connect-btn main-connect-btn open-agent-modal"
+              data-agent-name="{{ agent.full_name }}"
+              data-agent-agency="{{ agent.agency_name }}"
+            >
+              Send a Message <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- AI match CTA -->
+  <section class="ai-match-section">
+    <div class="w3-content">
+      <div class="ai-match-card">
+        <div class="ai-match-text">
+          <h2>Can’t find the perfect match?<br><span>Let our AI assist you.</span></h2>
+          <p>
+            Describe your property needs, and our AI Assistant will match you
+            with the top 3 homes who fit your profile perfectly.
+          </p>
+          <a href="{{ url_for('ai_assistant') }}" class="smart-match-btn">Start Smart Match</a>
+        </div>
+
+        <div class="ai-match-visual">
+          <div class="ai-icon-box">
+            <i class="fa-solid fa-head-side-virus"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+<footer class="footer-section">
+  <div class="w3-content footer-grid">
+    <div>
+      <h3>Bayti</h3>
+      <p>The modern standard for real estate in Lebanon. We bring transparency and trust to every home journey.</p>
+      <div class="footer-socials">
+        <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+        <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+      </div>
+    </div>
+
+    <div>
+      <h4>Discover</h4>
+      <a href="{{ url_for('buy') }}" class="bayti-link">Buy a Home</a>
+      <a href="{{ url_for('rent') }}" class="bayti-link">Rent a Home</a>
+      <a href="{{ url_for('sell') }}" class="bayti-link">Sell a Property</a>
+    </div>
+
+    <div>
+      <h4>Resources</h4>
+      <a href="{{ url_for('trust_certification') }}">Trust Certification</a>
+      <a href="{{ url_for('ai_insights_guide') }}">AI Insights Guide</a>
+      <a href="{{ url_for('report_abuse') }}">Report Abuse</a>
+    </div>
+
+    <div>
+      <h4>Company</h4>
+      <a href="{{ url_for('terms_of_service') }}">Terms of Service</a>
+      <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+      <a href="{{ url_for('cookies_settings') }}">Cookies Settings</a>
+      <a href="{{ url_for('contact_us') }}">Contact Us</a>
+    </div>
+  </div>
+
+  <div class="w3-content footer-bottom">
+    <p>© 2024 Bayti Real Estate Lebanon. All rights reserved.</p>
+    <span>DESIGNED FOR LEBANON</span>
+  </div>
+</footer>
+
+  <!-- SEND MESSAGE MODAL -->
+  <div id="agentModalOverlay" class="agent-modal-overlay">
+    <div class="agent-modal-box">
+
+      <button type="button" class="agent-modal-close" id="closeAgentModal">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="agent-modal-header">
+        <h2>Send a message</h2>
+      </div>
+
+      <div class="agent-modal-agent-info">
+        <h3 id="modalAgentName">Agent Name</h3>
+        <p id="modalAgentAgency">Agency Name</p>
+      </div>
+
+      <form class="agent-modal-form" method="POST" action="{{ url_for('contact_agent_general') }}">
+        <input type="hidden" name="agent_name" id="modalHiddenAgentName">
+
+        <textarea
+          name="message"
+          id="modalMessage"
+          placeholder="Write your message..."
+          rows="5"
+          required
+        ></textarea>
+
+        <button type="submit" class="agent-modal-send-btn">
+          Send Message
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const modalOverlay = document.getElementById("agentModalOverlay");
+      const closeModalBtn = document.getElementById("closeAgentModal");
+
+      const modalAgentName = document.getElementById("modalAgentName");
+      const modalAgentAgency = document.getElementById("modalAgentAgency");
+      const modalMessage = document.getElementById("modalMessage");
+      const modalHiddenAgentName = document.getElementById("modalHiddenAgentName");
+
+      const openButtons = document.querySelectorAll(".open-agent-modal");
+
+      openButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          const agentName = this.getAttribute("data-agent-name") || "Agent";
+          const agentAgency = this.getAttribute("data-agent-agency") || "";
+
+          modalAgentName.textContent = agentName;
+          modalAgentAgency.textContent = agentAgency;
+          modalHiddenAgentName.value = agentName;
+          modalMessage.value = "Hello " + agentName + ", I’m interested in your listings.";
+
+          modalOverlay.classList.add("show");
+          document.body.classList.add("modal-open");
+        });
+      });
+
+      closeModalBtn.addEventListener("click", function () {
+        modalOverlay.classList.remove("show");
+        document.body.classList.remove("modal-open");
+      });
+
+      modalOverlay.addEventListener("click", function (e) {
+        if (e.target === modalOverlay) {
+          modalOverlay.classList.remove("show");
+          document.body.classList.remove("modal-open");
+        }
+      });
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          modalOverlay.classList.remove("show");
+          document.body.classList.remove("modal-open");
+        }
+      });
+    });
+
+    function toggleMobileMenu() {
+      var x = document.getElementById("mobileMenu");
+      if (x.className.indexOf("w3-show") === -1) {
+        x.className += " w3-show";
+      } else {
+        x.className = x.className.replace(" w3-show", "");
+      }
+    }
+  </script>
+</body>
+</html>

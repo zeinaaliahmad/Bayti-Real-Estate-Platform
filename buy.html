@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bayti - Buy</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet"
+    href="{{ url_for('static', filename='css/buy.css') }}">
+
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="w3-top">
+  <div class="w3-bar bayti-navbar">
+
+    <div class="bayti-logo">
+      <a href="{{ url_for('home') }}" class="navbar-logo-link">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Bayti Logo" class="navbar-logo">
+      </a>
+    </div>
+
+    <div class="bayti-nav-center">
+      <a href="{{ url_for('buy') }}" class="bayti-link">Buy</a>
+      <a href="{{ url_for('rent') }}" class="bayti-link">Rent</a>
+      <a href="{{ url_for('sell') }}" class="bayti-link">Sell</a>
+      <a href="{{ url_for('find_agent') }}" class="bayti-link">Find an Agent</a>
+      <a href="{{ url_for('ai_assistant') }}" class="bayti-link">HomesyAI</a>
+    </div>
+
+    <div class="bayti-nav-right">
+      <a href="{{ url_for('favorites') }}" class="favorites-link">
+        <i class="fa-solid fa-heart"></i>
+      </a>
+
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard') }}" class="bayti-login">Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="bayti-signup">Logout</a>
+      {% else %}
+        <a href="{{ url_for('login') }}" class="bayti-login">Login</a>
+        <a href="{{ url_for('signup') }}" class="bayti-signup">Sign Up</a>
+      {% endif %}
+    </div>
+
+    <a href="javascript:void(0)" class="bayti-menu-btn" onclick="toggleMobileMenu()">
+      <i class="fa-solid fa-bars"></i>
+    </a>
+  </div>
+
+  <div id="mobileMenu" class="w3-bar-block bayti-mobile-menu w3-hide">
+    <a href="{{ url_for('buy') }}" class="w3-bar-item w3-button">Buy</a>
+    <a href="{{ url_for('rent') }}" class="w3-bar-item w3-button">Rent</a>
+    <a href="{{ url_for('sell') }}" class="w3-bar-item w3-button">Sell or Rent my Property</a>
+    <a href="{{ url_for('find_agent') }}" class="w3-bar-item w3-button">Find an Agent</a>
+    <a href="{{ url_for('ai_assistant') }}" class="w3-bar-item w3-button">AI Assistant</a>
+    {% if current_user.is_authenticated %}
+      <a href="{{ url_for('dashboard') }}" class="w3-bar-item w3-button bayti-mobile-signin">Dashboard</a>
+      <a href="{{ url_for('logout') }}" class="w3-bar-item w3-button bayti-mobile-signin">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}" class="w3-bar-item w3-button bayti-mobile-signin">Sign In</a>
+    {% endif %}
+  </div>
+</div>
+
+<section class="top-filters">
+  <div class="w3-content">
+    <form method="GET" action="{{ url_for('buy') }}" class="top-filters-wrap">
+
+      <div class="search-input">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input
+          type="text"
+          name="city"
+          value="{{ selected_city or '' }}"
+          placeholder="Beirut, Ashrafieh, Mansourieh..."
+        >
+      </div>
+
+      <!-- PRICE -->
+      <div class="filter-dropdown">
+        <button type="button" class="filter-btn dropdown-toggle" data-target="priceDropdown">
+          Price <i class="fa-solid fa-chevron-down"></i>
+        </button>
+
+        <div class="dropdown-panel" id="priceDropdown">
+          <div class="dropdown-header">
+            <span>Search with my buying power</span>
+            <button type="button" class="done-btn" data-close="priceDropdown">Done</button>
+          </div>
+
+          <div class="price-graph">
+            <div class="bars">
+              <span style="height: 90px;"></span>
+              <span style="height: 15px;"></span>
+              <span style="height: 10px;"></span>
+              <span style="height: 12px;"></span>
+              <span style="height: 18px;"></span>
+              <span style="height: 26px;"></span>
+              <span style="height: 20px;"></span>
+              <span style="height: 14px;"></span>
+              <span style="height: 10px;"></span>
+              <span style="height: 8px;"></span>
+              <span style="height: 6px;"></span>
+              <span style="height: 5px;"></span>
+              <span style="height: 4px;"></span>
+              <span style="height: 3px;"></span>
+            </div>
+            <div class="slider-line">
+              <div class="slider-dot left"></div>
+              <div class="slider-dot right"></div>
+            </div>
+          </div>
+
+          <div class="price-inputs">
+            <div class="price-select">
+              <span>$</span>
+              <input type="number" name="min_price" placeholder="No min" value="{{ min_price or '' }}">
+            </div>
+
+            <div class="price-select">
+              <span>$</span>
+              <input type="number" name="max_price" placeholder="No max" value="{{ max_price or '' }}">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROOMS -->
+      <div class="filter-dropdown">
+        <button type="button" class="filter-btn dropdown-toggle" data-target="roomsDropdown">
+          Rooms <i class="fa-solid fa-chevron-down"></i>
+        </button>
+
+        <div class="dropdown-panel rooms-panel" id="roomsDropdown">
+          <div class="dropdown-header">
+            <span>Rooms</span>
+            <button type="button" class="done-btn" data-close="roomsDropdown">Done</button>
+          </div>
+
+          <div class="room-group">
+            <label>Bedrooms</label>
+            <div class="segmented-grid">
+              <label><input type="radio" name="bedrooms" value="any" {% if not selected_bedrooms or selected_bedrooms == 'any' %}checked{% endif %}><span>Any</span></label>
+              <label><input type="radio" name="bedrooms" value="studio" {% if selected_bedrooms == 'studio' %}checked{% endif %}><span>Studio</span></label>
+              <label><input type="radio" name="bedrooms" value="1" {% if selected_bedrooms == '1' %}checked{% endif %}><span>1</span></label>
+              <label><input type="radio" name="bedrooms" value="2" {% if selected_bedrooms == '2' %}checked{% endif %}><span>2</span></label>
+              <label><input type="radio" name="bedrooms" value="3" {% if selected_bedrooms == '3' %}checked{% endif %}><span>3</span></label>
+              <label><input type="radio" name="bedrooms" value="4" {% if selected_bedrooms == '4' %}checked{% endif %}><span>4</span></label>
+              <label><input type="radio" name="bedrooms" value="5+" {% if selected_bedrooms == '5+' %}checked{% endif %}><span>5+</span></label>
+            </div>
+          </div>
+
+          <div class="room-group">
+            <label>Bathrooms</label>
+            <div class="segmented-grid">
+              <label><input type="radio" name="bathrooms" value="any" {% if not selected_bathrooms or selected_bathrooms == 'any' %}checked{% endif %}><span>Any</span></label>
+              <label><input type="radio" name="bathrooms" value="1" {% if selected_bathrooms == '1' %}checked{% endif %}><span>1</span></label>
+              <label><input type="radio" name="bathrooms" value="2" {% if selected_bathrooms == '2' %}checked{% endif %}><span>2</span></label>
+              <label><input type="radio" name="bathrooms" value="3" {% if selected_bathrooms == '3' %}checked{% endif %}><span>3</span></label>
+              <label><input type="radio" name="bathrooms" value="4" {% if selected_bathrooms == '4' %}checked{% endif %}><span>4</span></label>
+              <label><input type="radio" name="bathrooms" value="5+" {% if selected_bathrooms == '5+' %}checked{% endif %}><span>5+</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HOME TYPE -->
+      <div class="filter-dropdown">
+        <button type="button" class="filter-btn dropdown-toggle" data-target="typeDropdown">
+          Property Type <i class="fa-solid fa-chevron-down"></i>
+        </button>
+
+        <div class="dropdown-panel type-panel" id="typeDropdown">
+          <div class="dropdown-header">
+            <span>Home type</span>
+            <button type="button" class="done-btn" data-close="typeDropdown">Done</button>
+          </div>
+
+          <div class="type-grid">
+            <label><input type="radio" name="type" value="apartment"><span><i class="fa-solid fa-building"></i> Apartment</span></label>
+            <label><input type="radio" name="type" value="villa"><span><i class="fa-solid fa-house"></i> Villa</span></label>
+            <label><input type="radio" name="type" value="office"><span><i class="fa-solid fa-briefcase"></i> Office</span></label>
+            <label><input type="radio" name="type" value="land"><span><i class="fa-solid fa-tree"></i> Land</span></label>
+            <label><input type="radio" name="type" value="shop"><span><i class="fa-solid fa-shop"></i> Shop</span></label>
+            <label><input type="radio" name="type" value="penthouse"><span><i class="fa-solid fa-city"></i> Penthouse</span></label>
+            <label><input type="radio" name="type" value="townhouse"><span><i class="fa-solid fa-house-chimney"></i> Townhouse</span></label>
+            <label><input type="radio" name="type" value="duplex"><span><i class="fa-solid fa-building-circle-arrow-right"></i> Duplex</span></label>
+            <label><input type="radio" name="type" value="studio"><span><i class="fa-solid fa-desktop"></i> Studio</span></label>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="filter-chip verified-chip">Apply Filters</button>
+
+      <label class="filter-chip checkbox-chip">
+        <input type="checkbox" name="generator" value="1" {% if generator == '1' %}checked{% endif %}>
+        <span>24/7 Electricity</span>
+      </label>
+
+      <label class="filter-chip checkbox-chip">
+        <input type="checkbox" name="balcony" value="1" {% if balcony == '1' %}checked{% endif %}>
+        <span>Balcony</span>
+      </label>
+
+      <label class="filter-chip checkbox-chip">
+        <input type="checkbox" name="elevator" value="1" {% if elevator == '1' %}checked{% endif %}>
+        <span>Elevator</span>
+      </label>
+
+      <label class="filter-chip checkbox-chip">
+        <input type="checkbox" name="furnished" value="1" {% if furnished == '1' %}checked{% endif %}>
+        <span>Furnished</span>
+      </label>
+
+      <label class="filter-chip checkbox-chip">
+        <input type="checkbox" name="parking" value="1" {% if parking == '1' %}checked{% endif %}>
+        <span>Parking</span>
+      </label>
+
+      <label class="filter-chip checkbox-chip">
+        <input type="checkbox" name="ac" value="1" {% if ac == '1' %}checked{% endif %}>
+        <span>AC</span>
+      </label>
+
+      <label class="filter-chip checkbox-chip">
+        <input type="checkbox" name="heating" value="1" {% if heating == '1' %}checked{% endif %}>
+        <span>Heating</span>
+      </label>
+
+      <label class="filter-chip checkbox-chip">
+        <input type="checkbox" name="solar_ready" value="1" {% if solar_ready == '1' %}checked{% endif %}>
+        <span>Solar Ready</span>
+      </label>
+
+      <a href="{{ url_for('buy') }}" class="clear-filters-btn">Clear</a>
+    </form>
+  </div>
+</section>
+
+<!-- Main listings -->
+<main class="listings-page">
+  <div class="w3-content">
+    <div class="page-header">
+      <div>
+        <h1>Properties for Sale in Lebanon</h1>
+        <p>{{ pagination.total if pagination else properties|length }} available listings curated by Bayti AI</p>
+      </div>
+
+      <form method="GET" action="{{ url_for('buy') }}" id="sortForm">
+        <input type="hidden" name="type" value="{{ selected_type or '' }}">
+        <input type="hidden" name="city" value="{{ selected_city or '' }}">
+        <input type="hidden" name="district" value="{{ selected_district or '' }}">
+        <input type="hidden" name="min_price" value="{{ min_price or '' }}">
+        <input type="hidden" name="max_price" value="{{ max_price or '' }}">
+        <input type="hidden" name="min_area" value="{{ min_area or '' }}">
+        <input type="hidden" name="max_area" value="{{ max_area or '' }}">
+        <input type="hidden" name="bedrooms" value="{{ selected_bedrooms or '' }}">
+        <input type="hidden" name="bathrooms" value="{{ selected_bathrooms or '' }}">
+        <input type="hidden" name="furnished" value="{{ furnished or '' }}">
+        <input type="hidden" name="balcony" value="{{ balcony or '' }}">
+        <input type="hidden" name="elevator" value="{{ elevator or '' }}">
+        <input type="hidden" name="parking" value="{{ parking or '' }}">
+        <input type="hidden" name="generator" value="{{ generator or '' }}">
+        <input type="hidden" name="ac" value="{{ ac or '' }}">
+        <input type="hidden" name="heating" value="{{ heating or '' }}">
+        <input type="hidden" name="solar_ready" value="{{ solar_ready or '' }}">
+
+        <div class="sort-box">
+          <span>SORT BY:</span>
+          <select name="sort" onchange="this.form.submit()">
+            <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest First</option>
+            <option value="oldest" {% if selected_sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+            <option value="price_low" {% if selected_sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+            <option value="price_high" {% if selected_sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+            <option value="area_low" {% if selected_sort == 'area_low' %}selected{% endif %}>Area: Small to Large</option>
+            <option value="area_high" {% if selected_sort == 'area_high' %}selected{% endif %}>Area: Large to Small</option>
+          </select>
+          <i class="fa-solid fa-chevron-down sort-icon"></i>
+        </div>
+      </form>
+    </div>
+
+    <div class="properties-grid">
+      {% if properties %}
+        {% for property in properties %}
+          <article class="property-card">
+            <a href="{{ url_for('property_details', property_id=property.id) }}" class="property-card-link">
+              <div class="property-image-wrap">
+                <img src="{{ get_primary_image(property) }}" alt="{{ property.title }}">
+
+                <div class="property-badges">
+                  {% if property.generator_available %}
+                    <span class="badge blue-soft">⚡ 24/7 POWER</span>
+                  {% endif %}
+
+                  {% if property.price_per_sqm %}
+                    <span class="badge cream">↔ WITHIN MARKET</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="property-content">
+                <div class="price-row">
+                  <h3>${{ "{:,.0f}".format(property.price_usd) }}</h3>
+                  <span class="mini-tag">AI INSIGHT</span>
+                </div>
+
+                <h4>{{ property.title }}</h4>
+
+                <p class="location">
+                  <i class="fa-solid fa-location-dot"></i>
+                  {% if property.neighborhood %}
+                    {{ property.neighborhood }}{% if property.city %}, {{ property.city }}{% endif %}
+                  {% elif property.district %}
+                    {{ property.district }}{% if property.city %}, {{ property.city }}{% endif %}
+                  {% else %}
+                    {{ property.city }}
+                  {% endif %}
+                </p>
+
+                <div class="property-meta">
+                  <span><i class="fa-solid fa-bed"></i> {{ property.bedrooms }}</span>
+                  <span><i class="fa-solid fa-bath"></i> {{ property.bathrooms }}</span>
+                  <span><i class="fa-solid fa-ruler-combined"></i> {{ property.area_sqm|int }} m²</span>
+                </div>
+              </div>
+            </a>
+
+            <div class="favorite-form-wrap">
+              {% if current_user.is_authenticated %}
+                {% if property.id in favorite_ids %}
+                  <form method="POST" action="{{ url_for('remove_favorite', favorite_id=favorite_map[property.id]) }}">
+                    <button 
+                      class="favorite-btn saved"
+                      type="submit"
+                      aria-label="Remove from favorites"
+                    >
+                      <i class="fa-solid fa-heart"></i>
+                    </button>
+                  </form>
+                {% else %}
+                  <form method="POST" action="{{ url_for('add_favorite', property_id=property.id) }}">
+                    <button
+                      class="favorite-btn"
+                      type="submit"
+                      aria-label="Add to favorites"
+                    >
+                      <i class="fa-solid fa-heart"></i>
+                    </button>
+                  </form>
+                {% endif %}
+              {% else %}
+                <a href="{{ url_for('login') }}" class="favorite-btn" aria-label="Login to save">
+                  <i class="fa-solid fa-heart"></i>
+                </a>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
+      {% else %}
+        <div class="no-results">
+          <h3>No properties found</h3>
+          <p>Try adjusting your filters to see more listings.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    {% if pagination and pagination.pages > 1 %}
+      <div class="pagination-wrap">
+        <div class="pagination-box">
+          {% if pagination.has_prev %}
+            <a
+              class="page-btn icon-btn"
+              href="{{ url_for('buy',
+                  page=pagination.prev_num,
+                  type=selected_type,
+                  city=selected_city,
+                  district=selected_district,
+                  min_price=min_price,
+                  max_price=max_price,
+                  min_area=min_area,
+                  max_area=max_area,
+                  bedrooms=selected_bedrooms,
+                  bathrooms=selected_bathrooms,
+                  furnished=furnished,
+                  balcony=balcony,
+                  elevator=elevator,
+                  parking=parking,
+                  generator=generator,
+                  ac=ac,
+                  heating=heating,
+                  solar_ready=solar_ready
+              ) }}"
+              aria-label="Previous page"
+            >
+              <i class="fa-solid fa-chevron-left"></i>
+            </a>
+          {% else %}
+            <span class="page-btn icon-btn disabled">
+              <i class="fa-solid fa-chevron-left"></i>
+            </span>
+          {% endif %}
+
+          {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+            {% if page_num %}
+              <a
+                class="page-btn {% if page_num == pagination.page %}active{% endif %}"
+                href="{{ url_for('buy',
+                    page=page_num,
+                    type=selected_type,
+                    city=selected_city,
+                    district=selected_district,
+                    min_price=min_price,
+                    max_price=max_price,
+                    min_area=min_area,
+                    max_area=max_area,
+                    bedrooms=selected_bedrooms,
+                    bathrooms=selected_bathrooms,
+                    furnished=furnished,
+                    balcony=balcony,
+                    elevator=elevator,
+                    parking=parking,
+                    generator=generator,
+                    ac=ac,
+                    heating=heating,
+                    solar_ready=solar_ready
+                ) }}"
+              >
+                {{ page_num }}
+              </a>
+            {% else %}
+              <span class="page-dots">...</span>
+            {% endif %}
+          {% endfor %}
+
+          {% if pagination.has_next %}
+            <a
+              class="page-btn icon-btn"
+              href="{{ url_for('buy',
+                  page=pagination.next_num,
+                  type=selected_type,
+                  city=selected_city,
+                  district=selected_district,
+                  min_price=min_price,
+                  max_price=max_price,
+                  min_area=min_area,
+                  max_area=max_area,
+                  bedrooms=selected_bedrooms,
+                  bathrooms=selected_bathrooms,
+                  furnished=furnished,
+                  balcony=balcony,
+                  elevator=elevator,
+                  parking=parking,
+                  generator=generator,
+                  ac=ac,
+                  heating=heating,
+                  solar_ready=solar_ready
+              ) }}"
+              aria-label="Next page"
+            >
+              <i class="fa-solid fa-chevron-right"></i>
+            </a>
+          {% else %}
+            <span class="page-btn icon-btn disabled">
+              <i class="fa-solid fa-chevron-right"></i>
+            </span>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</main>
+
+  <!-- Subscribe section -->
+  <section class="insight-section">
+    <div class="w3-content insight-box">
+      <h2>Get AI Insights for Your Search</h2>
+      <p>
+        Subscribe to receive instant alerts when properties matching your criteria enter the market at a
+        “Fair Price” or better.
+      </p>
+
+      <form class="insight-form">
+        <input type="email" placeholder="Your email address">
+        <button type="submit">Set Alert</button>
+      </form>
+    </div>
+  </section>
+  <!-- Footer -->
+<footer class="footer-section">
+  <div class="w3-content footer-grid">
+    <div>
+      <h3>Bayti</h3>
+      <p>The modern standard for real estate in Lebanon. We bring transparency and trust to every home journey.</p>
+      <div class="footer-socials">
+        <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+        <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+      </div>
+    </div>
+
+    <div>
+      <h4>Discover</h4>
+      <a href="{{ url_for('buy') }}" class="bayti-link">Buy a Home</a>
+      <a href="{{ url_for('rent') }}" class="bayti-link">Rent a Home</a>
+      <a href="{{ url_for('sell') }}" class="bayti-link">Sell a Property</a>
+    </div>
+
+    <div>
+      <h4>Resources</h4>
+      <a href="{{ url_for('trust_certification') }}">Trust Certification</a>
+      <a href="{{ url_for('ai_insights_guide') }}">AI Insights Guide</a>
+      <a href="{{ url_for('report_abuse') }}">Report Abuse</a>
+    </div>
+
+    <div>
+      <h4>Company</h4>
+      <a href="{{ url_for('terms_of_service') }}">Terms of Service</a>
+      <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+      <a href="{{ url_for('cookies_settings') }}">Cookies Settings</a>
+      <a href="{{ url_for('contact_us') }}">Contact Us</a>
+    </div>
+  </div>
+
+  <div class="w3-content footer-bottom">
+    <p>© 2024 Bayti Real Estate Lebanon. All rights reserved.</p>
+    <span>DESIGNED FOR LEBANON</span>
+  </div>
+</footer>
+
+  <script>
+    function toggleMobileMenu() {
+      var x = document.getElementById("mobileMenu");
+      if (x.className.indexOf("w3-show") === -1) {
+        x.className += " w3-show";
+      } else {
+        x.className = x.className.replace(" w3-show", "");
+      }
+    }
+  </script>
+  <script src="{{ url_for('static', filename='js/buy-filters.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #f6f7fb;
+    color: #111827;
+}
+
+/* remove underline on right-side dashboard links */
+.bayti-nav-right .bayti-link::after,
+.bayti-nav-right .bayti-link:hover::after,
+.bayti-nav-right .bayti-link.active::after,
+.bayti-nav-right .active-no-line::after,
+.signup-btn::after {
+    display: none !important;
+}
+
+.nav-icon-link {
+    font-size: 21px;
+}
+
+.dashboard-hero {
+    position: relative;
+    min-height: 360px;
+    background:
+        linear-gradient(rgba(15, 23, 42, 0.45), rgba(15, 23, 42, 0.35)),
+        url("../images/signup-house.jpg") center/cover no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+}
+
+.dashboard-overlay {
+    position: absolute;
+    inset: 0;
+}
+
+.dashboard-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.welcome-card {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(6px);
+    border-radius: 28px;
+    padding: 34px;
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.14);
+}
+
+.welcome-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.eyebrow {
+    margin: 0 0 8px;
+    color: #8b5e3c;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.welcome-card h1 {
+    margin: 0 0 12px;
+    font-size: 42px;
+    line-height: 1.1;
+    color: #0f172a;
+}
+
+.subtitle {
+    margin: 0;
+    max-width: 720px;
+    font-size: 17px;
+    line-height: 1.7;
+    color: #4b5563;
+}
+
+.profile-badge {
+    width: 68px;
+    height: 68px;
+    min-width: 68px;
+    border-radius: 50%;
+    background: #4b3a2f;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 10px 24px rgba(75, 58, 47, 0.24);
+}
+
+.dashboard-actions {
+    margin-top: 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.primary-btn,
+.secondary-btn {
+    text-decoration: none;
+    border-radius: 14px;
+    padding: 14px 20px;
+    font-weight: 700;
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: 0.25s ease;
+}
+
+.primary-btn {
+    background: #111827;
+    color: white;
+}
+
+.primary-btn:hover {
+    background: #1f2937;
+}
+
+.secondary-btn {
+    background: white;
+    color: #111827;
+    border: 1px solid #d1d5db;
+}
+
+.secondary-btn:hover {
+    background: #f9fafb;
+}
+
+.dashboard-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 24px 70px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.info-card {
+    background: white;
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.1);
+}
+
+.info-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    background: #f3ebe4;
+    color: #8b5e3c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 18px;
+}
+
+.info-card h3 {
+    margin: 0 0 12px;
+    font-size: 23px;
+    color: #111827;
+}
+
+.info-card p {
+    margin: 0 0 18px;
+    line-height: 1.7;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+.info-card a {
+    color: #8b5e3c;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.info-card a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 1024px) {
+    .welcome-card h1 {
+        font-size: 34px;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .welcome-top {
+        flex-direction: column;
+    }
+
+    .profile-badge {
+        width: 58px;
+        height: 58px;
+        min-width: 58px;
+        font-size: 24px;
+    }
+
+    .welcome-card {
+        padding: 24px;
+    }
+
+    .welcome-card h1 {
+        font-size: 28px;
+    }
+
+    .subtitle {
+        font-size: 15px;
+    }
+}
+
+.logout-btn {
+    background: #4b3a2f;
+    color: white !important;
+    padding: 12px 22px;
+    border-radius: 28px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.25s ease;
+}
+
+.logout-btn:hover {
+    background: #382b23;
+}
+
+.logout-btn::after {
+    display: none !important;
+}
